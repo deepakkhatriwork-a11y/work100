@@ -8,10 +8,12 @@ import ProductCard from '../../components/productCard/ProductCard'
 function Home() {
   return (
     <Layout>
-      <Slider />
-      <Filter />
-      <Category />
-      <ProductCard />
+      <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
+        <Slider />
+        <Filter />
+        <Category />
+        <ProductCard />
+      </div>
     </Layout>
   )
 }

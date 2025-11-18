@@ -81,18 +81,18 @@ function ProductDetail() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
           {/* Product Images */}
-          <div className="bg-gray-50 rounded-3xl p-8 mb-6">
+          <div className="bg-gray-50 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-4 md:mb-6">
             <img 
               src={product.images[currentImage]}
               alt={product.name}
-              className="w-full h-64 object-contain"
+              className="w-full h-48 md:h-64 object-contain"
             />
           </div>
 
           {/* Image Dots */}
-          <div className="flex justify-center space-x-2 mb-6">
+          <div className="flex justify-center space-x-2 mb-4 md:mb-6">
             {product.images.map((_, index) => (
               <button
                 key={index}
@@ -100,13 +100,14 @@ function ProductDetail() {
                 className={`w-2 h-2 rounded-full transition-colors ${
                   currentImage === index ? 'bg-blue-600' : 'bg-gray-300'
                 }`}
+                aria-label={`View image ${index + 1}`}
               />
             ))}
           </div>
 
           {/* Product Info */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
             
             {/* Rating */}
             <div className="flex items-center mb-4">
@@ -123,39 +124,40 @@ function ProductDetail() {
             </div>
 
             {/* Price */}
-            <div className="text-3xl font-bold text-gray-900 mb-6">
+            <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-6">
               ${product.price.toLocaleString()}
             </div>
 
             {/* Color Selection */}
-            <div className="mb-6">
-              <div className="text-sm text-gray-600 mb-3">Color: {selectedColor}</div>
-              <div className="flex space-x-3">
+            <div className="mb-4 md:mb-6">
+              <div className="text-sm text-gray-600 mb-2 md:mb-3">Color: {selectedColor}</div>
+              <div className="flex space-x-2 md:space-x-3">
                 {product.colors.map((color) => (
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color.name)}
-                    className={`w-10 h-10 rounded-full border-2 transition-all ${
+                    className={`w-8 h-8 md:w-10 md:h-10 rounded-full border-2 transition-all ${
                       selectedColor === color.name 
                         ? 'border-blue-600 ring-2 ring-blue-200' 
                         : 'border-gray-300'
                     }`}
                     style={{ backgroundColor: color.value }}
                     title={color.name}
+                    aria-label={`Select color ${color.name}`}
                   />
                 ))}
               </div>
             </div>
 
             {/* Storage Selection */}
-            <div className="mb-8">
-              <div className="text-sm text-gray-600 mb-3">Storage</div>
-              <div className="flex space-x-3">
+            <div className="mb-6 md:mb-8">
+              <div className="text-sm text-gray-600 mb-2 md:mb-3">Storage</div>
+              <div className="flex flex-wrap gap-2 md:space-x-3">
                 {product.storage.map((storage) => (
                   <button
                     key={storage}
                     onClick={() => setSelectedStorage(storage)}
-                    className={`px-6 py-3 rounded-lg border-2 font-medium transition-all ${
+                    className={`px-4 py-2 md:px-6 md:py-3 rounded-lg border-2 font-medium transition-all ${
                       selectedStorage === storage
                         ? 'border-blue-600 bg-blue-50 text-blue-600'
                         : 'border-gray-300 text-gray-700 hover:border-gray-400'
@@ -230,17 +232,18 @@ function ProductDetail() {
             <div className="flex space-x-3">
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`p-4 rounded-2xl border-2 transition-colors ${
+                className={`p-3 md:p-4 rounded-2xl border-2 transition-colors ${
                   isFavorite 
                     ? 'border-red-500 bg-red-50 text-red-500' 
                     : 'border-gray-300 text-gray-600 hover:border-gray-400'
                 }`}
+                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
               >
-                <FiHeart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
+                <FiHeart className={`w-5 h-5 md:w-6 md:h-6 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-semibold hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-blue-600 text-white py-3 md:py-4 rounded-2xl font-semibold hover:bg-blue-700 transition-colors"
               >
                 Add to Cart
               </button>

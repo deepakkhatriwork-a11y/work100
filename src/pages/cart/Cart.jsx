@@ -266,25 +266,35 @@ function Cart() {
           {/* Cart Items */}
           <div className="divide-y divide-gray-200">
             {items.map((item) => (
-              <div key={item.id} className="p-6 flex flex-col sm:flex-row">
-                <div className="flex-shrink-0">
+              <div key={item.id} className="p-4 sm:p-6 flex flex-col md:flex-row border-b border-gray-200 last:border-0">
+                <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-32 h-32 object-cover rounded-md"
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md"
                   />
                 </div>
-                <div className="mt-4 sm:mt-0 sm:ml-6 flex-1">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 text-gray-600">₹{item.price.toFixed(2)}</p>
+                <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:justify-between">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-gray-600">₹{item.price.toFixed(2)}</p>
+                    </div>
+                    <div className="mt-2 md:mt-0">
+                      <p className="text-lg font-medium">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
                   
-                  <div className="mt-4 flex items-center">
-                    <div className="flex items-center border rounded-md">
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex items-center border rounded-md w-fit">
                       <button
                         onClick={() => handleRemoveItem(item.id)}
                         className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        aria-label="Decrease quantity"
                       >
                         <FiMinus className="h-4 w-4" />
                       </button>
@@ -292,29 +302,26 @@ function Cart() {
                       <button
                         onClick={() => handleAddItem(item)}
                         className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                        aria-label="Increase quantity"
                       >
                         <FiPlus className="h-4 w-4" />
                       </button>
                     </div>
                     <button
                       onClick={() => handleDeleteItem(item.id)}
-                      className="ml-4 text-red-600 hover:text-red-800"
+                      className="text-red-600 hover:text-red-800 flex items-center"
                     >
-                      <FiTrash2 className="h-5 w-5" />
+                      <FiTrash2 className="h-5 w-5 mr-1" />
+                      <span>Remove</span>
                     </button>
                   </div>
-                </div>
-                <div className="mt-4 sm:mt-0 sm:ml-6 text-right">
-                  <p className="text-lg font-medium">
-                    ₹{(item.price * item.quantity).toFixed(2)}
-                  </p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Order Summary */}
-          <div className="border-t border-gray-200 px-6 py-6">
+          <div className="border-t border-gray-200 px-4 sm:px-6 py-6">
             <div className="flex justify-between text-base font-medium text-gray-900">
               <p>Subtotal</p>
               <p>₹{totalAmount.toFixed(2)}</p>
@@ -343,7 +350,7 @@ function Cart() {
               {/* Payment Method Selection */}
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-3">Quick Checkout</h3>
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <label className="flex items-center">
                     <input
                       type="radio"

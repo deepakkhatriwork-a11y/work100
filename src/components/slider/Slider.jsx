@@ -92,7 +92,7 @@ const Slider = () => {
   };
 
   return (
-    <div className="relative w-full h-96 md:h-[500px] overflow-hidden rounded-3xl mx-4 my-6">
+    <div className="relative w-full max-w-3xl mx-auto h-40 sm:h-56 md:h-72 overflow-hidden rounded-lg md:rounded-xl my-3 sm:my-5 px-2">
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -112,8 +112,8 @@ const Slider = () => {
           {/* Content */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-white px-4 max-w-3xl">
-              <h2 className="text-3xl md:text-5xl font-bold mb-4">{slide.title}</h2>
-              <p className="text-lg md:text-xl">{slide.description}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-4">{slide.title}</h2>
+              <p className="text-sm sm:text-lg md:text-xl">{slide.description}</p>
             </div>
           </div>
         </div>
@@ -122,31 +122,34 @@ const Slider = () => {
       {/* Navigation arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition duration-300"
+        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 sm:p-2 rounded-full transition duration-300"
+        aria-label="Previous slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </button>
       
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition duration-300"
+        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 sm:p-2 rounded-full transition duration-300"
+        aria-label="Next slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
       {/* Dots indicator */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full transition duration-300 ${
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition duration-300 ${
               index === currentSlide ? 'bg-white' : 'bg-white/50'
             }`}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
