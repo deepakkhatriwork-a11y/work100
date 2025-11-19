@@ -1,40 +1,37 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiGrid, FiShoppingCart, FiFacebook, FiTwitter, FiInstagram, FiLinkedin, FiYoutube, FiGithub } from 'react-icons/fi'
-import { trackVisitor, getVisitorCount, updateVisitorActivity } from '../../utils/visitorTracker'
 
 function Footer() {
   const location = useLocation();
   const [visitorCount, setVisitorCount] = useState(0);
   const [mumbaiTime, setMumbaiTime] = useState('');
-  const [visitorId, setVisitorId] = useState(null);
 
-  // Initialize visitor tracking
+  // Simulate real-time visitor count
   useEffect(() => {
-    const id = trackVisitor();
-    setVisitorId(id);
+    // Get initial count from localStorage or start at a random number
+    const savedCount = localStorage.getItem('visitorCount');
+    if (savedCount) {
+      setVisitorCount(parseInt(savedCount) + 1);
+    } else {
+      // Start with a random number between 1000 and 5000
+      const initialCount = Math.floor(Math.random() * 4000) + 1000;
+      setVisitorCount(initialCount);
+    }
     
-    // Update activity every 30 seconds
-    const activityInterval = setInterval(() => {
-      if (id) {
-        updateVisitorActivity(id);
-      }
-    }, 30000);
+    // Save the updated count
+    localStorage.setItem('visitorCount', visitorCount.toString());
     
-    return () => {
-      if (activityInterval) clearInterval(activityInterval);
-    };
-  }, []);
-
-  // Get real visitor count
-  useEffect(() => {
-    const unsubscribe = getVisitorCount((count) => {
-      setVisitorCount(count);
-    });
+    // Simulate real-time updates
+    const interval = setInterval(() => {
+      setVisitorCount(prevCount => {
+        const newCount = prevCount + Math.floor(Math.random() * 3);
+        localStorage.setItem('visitorCount', newCount.toString());
+        return newCount;
+      });
+    }, 30000); // Update every 30 seconds
     
-    return () => {
-      // Unsubscribe from listener if needed
-    };
+    return () => clearInterval(interval);
   }, []);
 
   // Update Mumbai time every second
@@ -144,7 +141,7 @@ function Footer() {
               <li className="pt-2">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  {visitorCount} Online Now
+                  {visitorCount.toLocaleString()} Online Now
                 </span>
               </li>
               <li className="pt-2">
@@ -238,7 +235,7 @@ function Footer() {
               <li className="pt-2">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                  {visitorCount} Online Now
+                  {visitorCount.toLocaleString()} Online Now
                 </span>
               </li>
               <li className="pt-2">
