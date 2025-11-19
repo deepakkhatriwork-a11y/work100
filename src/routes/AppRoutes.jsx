@@ -15,6 +15,7 @@ import AddOneRupeeItem from '../pages/admin/pages/AddOneRupeeItem';
 import AddSampleProducts from '../pages/admin/pages/AddSampleProducts';
 import AddRequestedProducts from '../pages/admin/pages/AddRequestedProducts';
 import UpdateProduct from '../pages/admin/pages/UpdateProduct';
+import ManageAdvertisements from '../pages/admin/pages/ManageAdvertisements';
 import SetupAdmin from '../pages/admin/SetupAdmin';
 import MakeAdmin from '../pages/admin/MakeAdmin';
 import ProductDetail from '../pages/products/ProductDetail';
@@ -25,6 +26,7 @@ import Unauthorized from '../pages/unauthorized/Unauthorized';
 import NoPage from '../pages/nopage/NoPage';
 import FirebaseDiagnostics from '../pages/FirebaseDiagnostics';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
+import TermsAndConditions from '../pages/TermsAndConditions';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
 
 const AppRoutes = () => {
@@ -77,6 +79,11 @@ const AppRoutes = () => {
           <AddRequestedProducts />
         </ProtectedRoute>
       } />
+      <Route path="/manage-advertisements" element={
+        <ProtectedRoute requireAdmin={true}>
+          <ManageAdvertisements />
+        </ProtectedRoute>
+      } />
       <Route path="/update-product/:id" element={
         <ProtectedRoute requireAdmin={true}>
           <UpdateProduct />
@@ -90,6 +97,7 @@ const AppRoutes = () => {
       <Route path="/products/:id" element={<ProductInfo />} />
       <Route path="/firebase-diagnostics" element={<FirebaseDiagnostics />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       <Route path="*" element={<NoPage />} />
     </Routes>
   );
