@@ -70,7 +70,16 @@ function ProductCardWithContext() {
                 ) : (
                     <div className="flex flex-wrap -m-4">
                         {filteredProducts.map((item, index) => {
-                            const { id, title, price, imageUrl } = item;
+                            const { id, title, price, imageUrl, image } = item;
+                            // Fallback to 'image' property if 'imageUrl' is not available
+                            const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                            
+                            // Handle image loading errors with better fallback
+                            const handleImageError = (e) => {
+                                e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                                e.target.onerror = null; // Prevent infinite loop
+                            };
+                            
                             return (
                                 <div 
                                     key={id || index} 
@@ -84,8 +93,9 @@ function ProductCardWithContext() {
                                         <div className="flex justify-center">
                                             <img 
                                                 className="rounded-2xl w-full h-80 p-2 hover:scale-110 transition-transform duration-300 ease-in-out" 
-                                                src={imageUrl} 
+                                                src={productImageUrl} 
                                                 alt={title} 
+                                                onError={handleImageError}
                                             />
                                         </div>
                                         <div className="p-5 border-t-2">

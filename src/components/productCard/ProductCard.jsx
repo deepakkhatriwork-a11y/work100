@@ -27,7 +27,7 @@ function ProductCard() {
             id: product.id,
             name: product.title,
             price: product.price,
-            image: product.imageUrl || product.image
+            image: product.imageUrl || product.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'
         };
         dispatch(addToWishlist(wishlistItem));
         toast.success('Added to wishlist');
@@ -166,6 +166,13 @@ function ProductCard() {
                             const { id, title, price, description, imageUrl, image } = item;
                             // Fallback to 'image' property if 'imageUrl' is not available
                             const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                            
+                            // Handle image loading errors with better fallback
+                            const handleImageError = (e) => {
+                                e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                                e.target.onerror = null; // Prevent infinite loop
+                            };
+                            
                             return (
                                 <div 
                                     key={id || index} 
@@ -181,9 +188,7 @@ function ProductCard() {
                                                 className="rounded-2xl w-full h-60 object-cover p-2 hover:scale-105 transition-transform duration-300 ease-in-out" 
                                                 src={productImageUrl} 
                                                 alt={title || 'Product'} 
-                                                onError={(e) => {
-                                                    e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
-                                                }}
+                                                onError={handleImageError}
                                             />
                                         </div>
                                         <div className="p-4 border-t-2">
