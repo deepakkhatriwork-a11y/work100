@@ -81,7 +81,7 @@ function Header() {
   return (
     <header 
       ref={headerRef}
-      className={`fixed top-0 left-0 right-0 w-full z-50 bg-white dark:bg-gray-800 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 w-full z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all duration-300 ${
         scrolled ? 'shadow-md' : 'shadow-sm'
       } py-3 md:py-4`}
     >
@@ -191,20 +191,15 @@ function Header() {
               <FiSearch size={20} />
             </button>
             
-            {/* Cart Icon for mobile */}
-            <Link to="/cart" className="text-gray-700 hover:text-primary focus:outline-none relative p-2">
-              <FiShoppingCart size={20} />
-              {items?.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                  {items.length}
-                </span>
-              )}
+            {/* Wishlist Icon for mobile */}
+            <Link to="/wishlist" className="text-gray-700 hover:text-primary focus:outline-none relative p-2">
+              <FiHeart size={20} />
             </Link>
             
             {/* Menu Toggle */}
             <button
               onClick={toggleMenu}
-              className="text-gray-700 hover:text-primary focus:outline-none p-2"
+              className="text-gray-700 hover:text-primary focus:outline-none p-2 bg-transparent"
               aria-label="Toggle navigation menu"
             >
               {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}

@@ -13,6 +13,7 @@ import FirebaseTest from '../pages/admin/dashboard/FirebaseTest';
 import AddProduct from '../pages/admin/pages/AddProduct';
 import AddOneRupeeItem from '../pages/admin/pages/AddOneRupeeItem';
 import AddSampleProducts from '../pages/admin/pages/AddSampleProducts';
+import AddRequestedProducts from '../pages/admin/pages/AddRequestedProducts';
 import UpdateProduct from '../pages/admin/pages/UpdateProduct';
 import SetupAdmin from '../pages/admin/SetupAdmin';
 import MakeAdmin from '../pages/admin/MakeAdmin';
@@ -68,6 +69,11 @@ const AppRoutes = () => {
       <Route path="/add-sample-products" element={
         <ProtectedRoute requireAdmin={true}>
           <AddSampleProducts />
+        </ProtectedRoute>
+      } />
+      <Route path="/add-requested-products" element={
+        <ProtectedRoute requireAdmin={true}>
+          <AddRequestedProducts />
         </ProtectedRoute>
       } />
       <Route path="/update-product/:id" element={

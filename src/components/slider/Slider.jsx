@@ -46,24 +46,6 @@ const Slider = () => {
       image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=1200&q=80",
       title: "Dyson Airwrap",
       description: "Multi-styling tool for all hair types"
-    },
-    {
-      id: 8,
-      image: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?auto=format&fit=crop&w=1200&q=80",
-      title: "iPad Pro 12.9\"",
-      description: "M2 chip with stunning Liquid Retina XDR display"
-    },
-    {
-      id: 9,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80",
-      title: "Apple Watch Ultra 2",
-      description: "Rugged, capable, and high-performance watch"
-    },
-    {
-      id: 10,
-      image: "https://images.unsplash.com/photo-1585155770447-2f66e2a397b5?auto=format&fit=crop&w=1200&q=80",
-      title: "Bose SoundLink Revolve+",
-      description: "360° sound with deep, clear audio"
     }
   ];
 

@@ -1,15 +1,16 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { FiHome, FiGrid, FiShoppingCart, FiPackage, FiUser, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi'
+import { FiHome, FiGrid, FiShoppingCart, FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi'
 
 function Footer() {
   const location = useLocation();
 
-  const navItems = [
+  // Mobile navigation items - Account removed as per specification
+  const mobileNavItems = [
     { name: 'Home', to: '/', icon: FiHome },
     { name: 'Products', to: '/products', icon: FiGrid },
     { name: 'Cart', to: '/cart', icon: FiShoppingCart },
-    { name: 'Orders', to: '/order', icon: FiPackage },
+    // Account/Orders icon removed from mobile bottom nav as per specification
   ];
 
   return (
@@ -100,7 +101,7 @@ function Footer() {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40">
         <div className="flex justify-around items-center py-2">
-          {navItems.map((item) => (
+          {mobileNavItems.map((item) => (
             <Link
               key={item.name}
               to={item.to}

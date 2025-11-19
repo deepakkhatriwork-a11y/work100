@@ -11,20 +11,22 @@ function Filter() {
         setFilterType,
         filterPrice, 
         setFilterPrice,
-        originalProducts
+        products // Use products instead of originalProducts
     } = context;
 
-    // Get unique categories from products
-    const categories = [...new Set(originalProducts
-        .map(item => item.category)
-        .filter(Boolean))];
-    
+    // Get unique categories from products with proper error handling
+    const categories = products && Array.isArray(products) 
+        ? [...new Set(products
+            .map(item => item.category)
+            .filter(Boolean))]
+        : [];
+
     // Debug logging
-    console.log('Original products:', originalProducts);
+    console.log('Products:', products);
     console.log('Categories:', categories);
     
     // Check if there are no products at all
-    const hasProducts = originalProducts && originalProducts.length > 0;
+    const hasProducts = products && Array.isArray(products) && products.length > 0;
 
     const resetFilters = () => {
         setSearchkey('');

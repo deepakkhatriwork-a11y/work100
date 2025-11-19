@@ -69,9 +69,12 @@ const ShoppingCart = () => {
                     {/* Product Image */}
                     <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-gray-200 rounded-md overflow-hidden">
                       <img
-                        src={item.image}
+                        src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
                         alt={item.name}
                         className="w-full h-full object-cover object-center"
+                        onError={(e) => {
+                          e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                        }}
                       />
                     </div>
 

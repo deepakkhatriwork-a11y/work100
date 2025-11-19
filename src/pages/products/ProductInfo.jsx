@@ -72,9 +72,12 @@ function ProductInfo() {
                 <div>
                     <div className="bg-gray-100 rounded-lg p-4 mb-4 flex items-center justify-center h-96">
                         <img 
-                            src={product.imageUrl} 
+                            src={product.imageUrl || product.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'} 
                             alt={product.title} 
                             className="max-h-full max-w-full object-contain"
+                            onError={(e) => {
+                                e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                            }}
                         />
                     </div>
                 </div>

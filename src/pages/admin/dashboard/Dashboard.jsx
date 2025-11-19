@@ -52,7 +52,7 @@ function StatusBadge({ status }) {
 
 function Dashboard() {
   const context = useContext(myContext)
-  const { state } = context
+  const { state, fixImageUrls } = context
   const { user } = useAuth()
   
   const [stats, setStats] = useState(sampleStats)
@@ -63,10 +63,7 @@ function Dashboard() {
   const [firebaseError, setFirebaseError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [showSampleData, setShowSampleData] = useState(false)
-
-  useEffect(() => {
-    fetchDashboardData()
-  }, [retryCount])
+  const [stateDistribution, setStateDistribution] = useState({})
 
   const fetchDashboardData = async () => {
     try {
@@ -143,6 +140,31 @@ function Dashboard() {
         order.paymentMethod === 'COD'
       ).length
       
+      // Calculate state distribution
+      const stateDistribution = {}
+      let knownOrdersCount = 0
+      ordersData.forEach(order => {
+        // Try to get state from addressInfo first, then fallback to userState
+        const state = order.addressInfo?.state || order.userState
+        if (state) {
+          if (!stateDistribution[state]) {
+            stateDistribution[state] = 0
+          }
+          stateDistribution[state]++
+          knownOrdersCount++
+        }
+      })
+      
+      // Only show states with at least one order
+      const filteredStateDistribution = {}
+      Object.entries(stateDistribution).forEach(([state, count]) => {
+        if (count > 0) {
+          filteredStateDistribution[state] = count
+        }
+      })
+      
+      setStateDistribution(filteredStateDistribution)
+      
       setStats([
         { label: 'Total Revenue', value: formatCurrency(totalRevenue), change: '+18% vs last week', trend: 'up' },
         { label: 'Orders Processed', value: totalOrders.toString(), change: '+6% vs last week', trend: 'up' },
@@ -171,6 +193,10 @@ function Dashboard() {
     }
   }
 
+  useEffect(() => {
+    fetchDashboardData()
+  }, [retryCount])
+
   const handleRetry = () => {
     setRetryCount(prev => prev + 1)
   }
@@ -189,8 +215,8 @@ function Dashboard() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm uppercase tracking-widest text-blue-600 font-semibold">Dashboard</p>
-              <h1 className="text-3xl font-bold text-gray-900 mt-1">Welcome back, {state?.name || 'Admin'}</h1>
-              <p className="text-gray-600 mt-2">Track your store performance, orders, inventory and customers.</p>
+              <h1 className="text-3xl font-bold text-gray-900 mt-1">Titanium Store</h1>
+              <p className="text-gray-600 mt-2">Manage your store performance, orders, inventory and customers.</p>
               {firebaseError && (
                 <div className="mt-2">
                   <p className="text-red-500 text-sm">
@@ -212,6 +238,18 @@ function Dashboard() {
               >
                 Add Product
               </Link>
+              <Link
+                to="/add-requested-products"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-green-600 to-teal-600 px-6 py-2 text-sm font-medium text-white hover:from-green-700 hover:to-teal-700 shadow-lg shadow-green-500/30 transition-all"
+              >
+                Add Sample Products
+              </Link>
+              <button
+                onClick={fixImageUrls}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 text-sm font-medium text-white hover:from-yellow-700 hover:to-orange-700 shadow-lg shadow-yellow-500/30 transition-all"
+              >
+                Fix Product Images
+              </button>
               <Link
                 to="/products"
                 className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
@@ -270,6 +308,9 @@ function Dashboard() {
                       <div>
                         <p className="font-medium text-gray-900">{order.customerName}</p>
                         <p className="text-sm text-gray-500">#{order.id?.slice(0, 8) || 'N/A'} • {formatDate(order.date)}</p>
+                        {order.addressInfo?.state && (
+                          <p className="text-sm text-gray-500">State: {order.addressInfo.state}</p>
+                        )}
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">{formatCurrency(order.totalAmount)}</p>
@@ -288,35 +329,38 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Inventory */}
-            <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 space-y-5">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Inventory Snapshot</h2>
-                <p className="text-sm text-gray-600">Current stock availability</p>
-              </div>
-              <div className="space-y-4">
-                {loading ? (
-                  <div className="text-center py-4 text-gray-600">
-                    Loading inventory...
-                  </div>
-                ) : inventory.length === 0 ? (
-                  <div className="text-center py-4 text-gray-600">
-                    No inventory data
-                  </div>
-                ) : (
-                  inventory.map((item) => (
-                    <div key={item.category} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium text-gray-900">{item.category}</p>
-                        <span className="text-sm text-gray-600 font-semibold">{item.inStock + item.reserved} items</span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span className="text-green-600 font-semibold mr-4">In stock: {item.inStock}</span>
-                        <span>Reserved: {item.reserved}</span>
-                      </div>
+            {/* Inventory and State Distribution */}
+            <div className="space-y-6">
+              {/* Inventory */}
+              <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 space-y-5">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Inventory Snapshot</h2>
+                  <p className="text-sm text-gray-600">Current stock availability</p>
+                </div>
+                <div className="space-y-4">
+                  {loading ? (
+                    <div className="text-center py-4 text-gray-600">
+                      Loading inventory...
                     </div>
-                  ))
-                )}
+                  ) : inventory.length === 0 ? (
+                    <div className="text-center py-4 text-gray-600">
+                      No inventory data
+                    </div>
+                  ) : (
+                    inventory.map((item) => (
+                      <div key={item.category} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-medium text-gray-900">{item.category}</p>
+                          <span className="text-sm text-gray-600 font-semibold">{item.inStock + item.reserved} items</span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <span className="text-green-600 font-semibold mr-4">In stock: {item.inStock}</span>
+                          <span>Reserved: {item.reserved}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>

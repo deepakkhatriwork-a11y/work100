@@ -26,25 +26,47 @@ function Cart() {
   const [pincode, setPincode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("razorpay"); // 'razorpay' or 'cod'
+  const [selectedState, setSelectedState] = useState(""); // Added state selection
 
-  const shipping = 0;
+  // State-wise shipping charges
+  const stateShippingCharges = {
+    "Rajasthan": 150,
+    "Telangana": 300,
+    "West Bengal": 350,
+    "Sikkim": 350,
+    "Tamil Nadu": 350,
+    "Punjab": 250,
+    "Manipur": 400,
+    "Maharashtra": 250,
+    "Nagaland": 500, // Updated to 500 RS as requested
+    "Andhra Pradesh": 250,
+    "Arunachal Pradesh": 250,
+    "Assam": 250,
+    "Bihar": 250,
+    "Chhattisgarh": 250,
+    "Goa": 250,
+    "Gujarat": 250,
+    "Haryana": 250,
+    "Himachal Pradesh": 250,
+    "Jharkhand": 250,
+    "Karnataka": 250,
+    "Kerala": 250,
+    "Madhya Pradesh": 250,
+    "Meghalaya": 250,
+    "Mizoram": 250,
+    "Odisha": 250,
+    "Tripura": 250,
+    "Uttarakhand": 250,
+    "Uttar Pradesh": 250,
+    // Add more states as needed
+  };
+
+  // Calculate shipping based on selected state
+  const shipping = selectedState ? (stateShippingCharges[selectedState] || 250) : 0;
   const grandTotal = shipping + totalAmount;
 
   const buyNow = async () => {
-    // Validation
-    if (name === "" || address === "" || pincode === "" || phoneNumber === "") {
-      return toast.error("All fields are required", {
-        position: "top-center",
-        autoClose: 1000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "colored",
-      });
-    }
-
+    // Validation is now handled in the modal component
     // Check if user is authenticated
     if (!user || !user.id) {
       toast.error("Please log in to place an order");
@@ -55,6 +77,7 @@ function Cart() {
     const addressInfo = {
       name,
       address,
+      state: selectedState,
       pincode,
       phoneNumber,
       date: new Date().toLocaleString("en-US", {
@@ -86,6 +109,8 @@ function Cart() {
         userName: user?.name || user?.displayName || '',
         userPhone: phoneNumber,
         userPincode: pincode,
+        userState: selectedState,
+        shippingCharges: shipping,
         paymentId: 'COD',
         totalAmount: grandTotal,
         status: 'Processing',
@@ -103,6 +128,7 @@ function Cart() {
         setAddress("");
         setPincode("");
         setPhoneNumber("");
+        setSelectedState("");
         setPaymentMethod("razorpay");
       } catch (error) {
         console.error('Error saving order:', error);
@@ -146,6 +172,8 @@ function Cart() {
           userName: user?.name || user?.displayName || '',
           userPhone: phoneNumber,
           userPincode: pincode,
+          userState: selectedState,
+          shippingCharges: shipping,
           paymentId,
           totalAmount: grandTotal,
           status: 'Processing',
@@ -163,6 +191,7 @@ function Cart() {
           setAddress("");
           setPincode("");
           setPhoneNumber("");
+          setSelectedState("");
         } catch (error) {
           console.error('Error saving order:', error);
           // Check if it's a permissions error
@@ -217,8 +246,8 @@ function Cart() {
               </svg>
             </div>
             
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">आपकी खरीदारी की टोकरी खाली है</h1>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">आपने अभी तक कोई वस्तु नहीं जोड़ी है। हमारे उत्पादों को ब्राउज़ करने के लिए नीचे दिए गए बटन पर क्लिक करें।</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">Your Shopping Cart is Empty</h1>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">You haven't added any items yet. Click the button below to browse our products.</p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
@@ -228,16 +257,16 @@ function Cart() {
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
-                खरीदारी जारी रखें
+                Continue Shopping
               </Link>
               <Link
                 to="/"
                 className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2 2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                 </svg>
-                होम पर वापस जाएं
+                Return to Home
               </Link>
             </div>
           </div>
@@ -269,9 +298,12 @@ function Cart() {
               <div key={item.id} className="p-4 sm:p-6 flex flex-col md:flex-row border-b border-gray-200 last:border-0">
                 <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
                   <img
-                    src={item.image}
+                    src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
                     alt={item.title}
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md"
+                    onError={(e) => {
+                      e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                    }}
                   />
                 </div>
                 <div className="flex-1">
@@ -328,7 +360,7 @@ function Cart() {
             </div>
             {shipping > 0 && (
               <div className="flex justify-between text-sm text-gray-600 mt-2">
-                <p>Shipping</p>
+                <p>Shipping ({selectedState})</p>
                 <p>₹{shipping}</p>
               </div>
             )}
@@ -340,6 +372,18 @@ function Cart() {
             <p className="mt-0.5 text-sm text-gray-500">
               Shipping and taxes calculated at checkout.
             </p>
+            <div className="mt-3 p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500 shadow-sm">
+              <p className="text-indigo-700 text-sm font-semibold">
+                Important: Shipping fee will not be refunded after order return.
+              </p>
+            </div>
+            {paymentMethod === "cod" && (
+              <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="text-yellow-800 text-sm">
+                  <strong>Note:</strong> With Cash on Delivery, you'll pay when the product is delivered to you.
+                </p>
+              </div>
+            )}
             <div className="mt-6 space-y-4">
               <div className="relative flex items-center justify-center my-4">
                 <div className="flex-grow border-t border-gray-300"></div>
@@ -387,6 +431,8 @@ function Cart() {
                 setPhoneNumber={setPhoneNumber}
                 buyNow={buyNow}
                 paymentMethod={paymentMethod}
+                selectedState={selectedState}
+                setSelectedState={setSelectedState}
               />
               
               {paymentMethod === "cod" && (

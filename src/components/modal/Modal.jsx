@@ -1,16 +1,84 @@
 import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useRef, useEffect } from 'react'
 
-export default function Modal({ name, address, pincode, phoneNumber, setName, setAddress, setPincode, setPhoneNumber, buyNow, paymentMethod }) {
+export default function Modal({ name, address, pincode, phoneNumber, setName, setAddress, setPincode, setPhoneNumber, buyNow, paymentMethod, selectedState, setSelectedState }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   const closeModal = () => setIsOpen(false)
   const openModal = () => setIsOpen(true)
 
   const handleOrder = (e) => {
     e.preventDefault();
+    
+    // Validation
+    if (name === "" || address === "" || pincode === "" || phoneNumber === "" || selectedState === "") {
+      // Show error message in the modal
+      alert("All fields are required");
+      return;
+    }
+    
     buyNow();
     closeModal();
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // List of Indian states
+  const indianStates = [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttarakhand",
+    "Uttar Pradesh",
+    "West Bengal"
+  ];
+
+  // Filter states based on search term
+  const filteredStates = indianStates.filter(state => 
+    state.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleStateSelect = (state) => {
+    setSelectedState(state);
+    setSearchTerm(state);
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -88,6 +156,48 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                         required
                       />
                     </div>
+                    <div ref={dropdownRef}>
+                      <label htmlFor="state" className="block mb-2 text-sm font-medium text-gray-900">
+                        Select State
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search state..."
+                          value={searchTerm}
+                          onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setIsDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsDropdownOpen(true)}
+                          className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
+                        />
+                        {isDropdownOpen && (
+                          <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-auto border border-gray-200">
+                            {filteredStates.length > 0 ? (
+                              filteredStates.map((state) => (
+                                <div
+                                  key={state}
+                                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                  onClick={() => handleStateSelect(state)}
+                                >
+                                  {state}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-sm text-gray-500">
+                                No states found
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {selectedState && (
+                        <div className="mt-2 text-sm text-gray-600">
+                          Selected: {selectedState}
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <label htmlFor="pincode" className="block mb-2 text-sm font-medium text-gray-900">
                         Enter Pincode
@@ -132,4 +242,3 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
     </>
   )
 }
-

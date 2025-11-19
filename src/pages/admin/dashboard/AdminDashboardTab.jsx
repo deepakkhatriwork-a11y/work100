@@ -10,12 +10,25 @@ import { toast } from 'react-toastify';
 
 function AdminDashboardTab() {
     const context = useContext(myContext)
-    const { mode, product, edithandle, deleteProduct, order, getOrderData, updateOrder, user, getUserData } = context
+    const { mode, product, edithandle, deleteProduct, order, getOrderData, updateOrder, user, getUserData, refundRequests, getRefundRequests, updateRefundRequest } = context
     let [isOpen, setIsOpen] = useState(false);
+    const [refundRequestsError, setRefundRequestsError] = useState(null);
     
     useEffect(() => {
         getOrderData();
         getUserData();
+        
+        // Try to fetch refund requests, but handle errors gracefully
+        getRefundRequests()
+            .then(result => {
+                if (!result.success) {
+                    setRefundRequestsError(result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching refund requests:', error);
+                setRefundRequestsError(error);
+            });
     }, []);
 
     function closeModal() {
@@ -41,6 +54,17 @@ function AdminDashboardTab() {
         }
     };
 
+    // Function to update refund request status
+    const updateRefundStatus = async (refundId, newStatus) => {
+        try {
+            await updateRefundRequest(refundId, { status: newStatus, processed: true });
+            toast.success('Refund request updated successfully');
+        } catch (error) {
+            console.error('Error updating refund request:', error);
+            toast.error('Failed to update refund request');
+        }
+    };
+
     return (
         <div className="container mx-auto px-4">
             <Tabs defaultIndex={0} className="mt-8">
@@ -63,6 +87,16 @@ function AdminDashboardTab() {
                         <button type="button" className="font-medium border-b-2 border-green-500 bg-[#605d5d12] text-green-500 rounded-lg text-xl hover:shadow-green-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center w-full">
                             <div className="flex gap-2 items-center justify-center">
                                 <FaUser /> Users
+                            </div>
+                        </button>
+                    </Tab>
+                    <Tab>
+                        <button type="button" className="font-medium border-b-2 border-yellow-500 bg-[#605d5d12] text-yellow-500 rounded-lg text-xl hover:shadow-yellow-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center w-full">
+                            <div className="flex gap-2 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Refunds
                             </div>
                         </button>
                     </Tab>
@@ -196,9 +230,12 @@ function AdminDashboardTab() {
                                                     {orderItem.cartItems?.map((item, itemIndex) => (
                                                         <div key={itemIndex} className="flex items-center">
                                                             <img 
-                                                                src={item.imageUrl || item.image} 
+                                                                src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'} 
                                                                 alt={item.title} 
                                                                 className="h-16 w-16 object-cover rounded-md"
+                                                                onError={(e) => {
+                                                                  e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                                                                }}
                                                             />
                                                             <div className="ml-4 flex-1">
                                                                 <h4 className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>{item.title}</h4>
@@ -277,6 +314,109 @@ function AdminDashboardTab() {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </TabPanel>
+
+                {/* Refund Requests Tab */}
+                <TabPanel>
+                    <div className="mb-16">
+                        <h1 className="text-center mb-5 text-3xl font-semibold underline" style={{ color: mode === 'dark' ? 'white' : '' }}>Refund Requests</h1>
+                        <div className="relative overflow-x-auto">
+                            {refundRequestsError ? (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500">Unable to load refund requests due to permissions.</p>
+                                    <p className="text-sm text-gray-400 mt-2">Make sure you have the correct Firebase security rules configured.</p>
+                                </div>
+                            ) : refundRequests.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500">No refund requests found</p>
+                                    <button 
+                                        onClick={() => {
+                                            getRefundRequests()
+                                                .then(result => {
+                                                    if (!result.success) {
+                                                        setRefundRequestsError(result.error);
+                                                    } else {
+                                                        setRefundRequestsError(null);
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error fetching refund requests:', error);
+                                                    setRefundRequestsError(error);
+                                                });
+                                        }}
+                                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        Refresh Refund Requests
+                                    </button>
+                                </div>
+                            ) : (
+                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                    <thead className="text-xs border border-gray-600 text-black uppercase bg-gray-200 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)]" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '' }}>
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3">S.No</th>
+                                            <th scope="col" className="px-6 py-3">Order ID</th>
+                                            <th scope="col" className="px-6 py-3">User</th>
+                                            <th scope="col" className="px-6 py-3">Amount</th>
+                                            <th scope="col" className="px-6 py-3">Request Date</th>
+                                            <th scope="col" className="px-6 py-3">Status</th>
+                                            <th scope="col" className="px-6 py-3">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {refundRequests.map((refund, index) => (
+                                            <tr key={index} className="bg-gray-50 border-b dark:border-gray-700" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '' }}>
+                                                <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>{index + 1}.</td>
+                                                <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
+                                                    {refund.orderId?.substring(0, 8) || 'N/A'}
+                                                </td>
+                                                <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
+                                                    {refund.userName || 'N/A'}
+                                                </td>
+                                                <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
+                                                    ₹{refund.refundAmount || '0'}
+                                                </td>
+                                                <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
+                                                    {refund.requestDate ? new Date(refund.requestDate).toLocaleDateString() : 'N/A'}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 text-xs rounded ${
+                                                        refund.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        refund.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                                                        refund.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                        'bg-gray-100 text-gray-800'
+                                                    }`}>
+                                                        {refund.status || 'Pending'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {refund.status === 'Pending' ? (
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => updateRefundStatus(refund.id, 'Approved')}
+                                                                className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                            <button
+                                                                onClick={() => updateRefundStatus(refund.id, 'Rejected')}
+                                                                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-sm text-gray-500">
+                                                            {refund.processed ? 'Processed' : 'N/A'}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
                     </div>
                 </TabPanel>

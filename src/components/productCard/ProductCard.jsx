@@ -3,7 +3,9 @@ import myContext from '../../context/data/myContext'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { addItemToCart } from '../../redux/slices/cartSlice'
+import { addToWishlist } from '../../redux/slices/wishlistSlice'
 import { useNavigate, Link } from 'react-router-dom'
+import { FiHeart } from 'react-icons/fi'
 
 function ProductCard() {
     const context = useContext(myContext)
@@ -17,6 +19,18 @@ function ProductCard() {
     const addCart = (product) => {
         dispatch(addItemToCart(product))
         toast.success('add to cart');
+    }
+
+    // add to wishlist
+    const addWishlist = (product) => {
+        const wishlistItem = {
+            id: product.id,
+            name: product.title,
+            price: product.price,
+            image: product.imageUrl || product.image
+        };
+        dispatch(addToWishlist(wishlistItem));
+        toast.success('Added to wishlist');
     }
 
     useEffect(() => {
@@ -93,13 +107,7 @@ function ProductCard() {
                         <p className="mt-2 text-gray-600 mb-6" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                             There are currently no products in the store.
                         </p>
-                        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                            <Link 
-                                to="/add-sample-products" 
-                                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
-                            >
-                                Add Sample Products
-                            </Link>
+                        <div className="mt-6">
                             <Link 
                                 to="/dashboard" 
                                 className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-md hover:shadow-lg"
@@ -131,12 +139,6 @@ function ProductCard() {
                                 Reset All Filters
                             </button>
                             <Link 
-                                to="/add-sample-products" 
-                                className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg hover:from-green-600 hover:to-teal-700 transition-all shadow-md hover:shadow-lg"
-                            >
-                                Add Sample Products
-                            </Link>
-                            <Link 
                                 to="/products" 
                                 className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-md hover:shadow-lg"
                             >
@@ -161,7 +163,9 @@ function ProductCard() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredProducts.map((item, index) => {
-                            const { id, title, price, description, imageUrl } = item;
+                            const { id, title, price, description, imageUrl, image } = item;
+                            // Fallback to 'image' property if 'imageUrl' is not available
+                            const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                             return (
                                 <div 
                                     key={id || index} 
@@ -175,8 +179,11 @@ function ProductCard() {
                                         <div className="flex justify-center cursor-pointer">
                                             <img 
                                                 className="rounded-2xl w-full h-60 object-cover p-2 hover:scale-105 transition-transform duration-300 ease-in-out" 
-                                                src={imageUrl} 
+                                                src={productImageUrl} 
                                                 alt={title || 'Product'} 
+                                                onError={(e) => {
+                                                    e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                                                }}
                                             />
                                         </div>
                                         <div className="p-4 border-t-2">
@@ -198,6 +205,19 @@ function ProductCard() {
                                             >
                                                 ₹ {price}
                                             </p>
+                                            <div className="flex justify-center mb-2">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        addWishlist(item);
+                                                    }} 
+                                                    type="button" 
+                                                    className="focus:outline-none text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm w-full py-2.5 flex items-center justify-center"
+                                                >
+                                                    <FiHeart className="mr-2" />
+                                                    Wishlist
+                                                </button>
+                                            </div>
                                             <div className="flex justify-center">
                                                 <button 
                                                     onClick={(e) => {

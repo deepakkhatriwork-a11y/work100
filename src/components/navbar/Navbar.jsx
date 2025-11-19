@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FiHeart } from 'react-icons/fi'; // Added wishlist icon
 
 function Navbar() {
     const [mode, setMode] = useState('light');
@@ -24,6 +25,7 @@ function Navbar() {
         { name: 'Products', to: '/allproducts' },
         { name: 'Orders', to: '/order' },
         { name: 'Cart', to: '/cart' },
+        { name: 'Wishlist', to: '/wishlist' }, // Added Wishlist
         { name: 'Dashboard', to: '/admin/dashboard' },
     ];
 
@@ -65,12 +67,25 @@ function Navbar() {
                             {mode === 'dark' ? '☀️' : '🌙'}
                         </button>
 
-                        {/* User Profile */}
-                        <div className="relative ml-3">
-                            <button className="flex items-center text-sm rounded-full">
-                                <span className="h-8 w-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center">👤</span>
-                            </button>
-                        </div>
+                        {/* Account Button - Separate from navItems for better styling */}
+                        <Link 
+                            to="/order"
+                            className={`flex items-center text-sm rounded-full p-2 ${
+                                mode === 'dark' 
+                                    ? 'text-gray-300 hover:bg-gray-700 hover:text-white' 
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                            }`}
+                            title="Account"
+                        >
+                            <span className="h-8 w-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center">👤</span>
+                            <span className="ml-2 hidden lg:inline">Account</span>
+                        </Link>
+
+                        {/* Wishlist Icon */}
+                        <Link to="/wishlist" className="relative p-2">
+                            <FiHeart className="text-xl" />
+                            {/* Badge can be added here if needed */}
+                        </Link>
 
                         {/* Cart */}
                         <Link to="/cart" className="relative p-2">
