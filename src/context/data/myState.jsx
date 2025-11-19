@@ -279,13 +279,13 @@ function MyState(props) {
                 // Don't fail the entire operation if refund request creation fails
             }
             
-            toast.success('Order successfully cancelled. Refund request sent to admin.');
+            // Removed toast notification here to prevent duplicate notifications
             getOrderData(); // Refresh orders list
             setLoading(false);
             return { success: true };
         } catch (error) {
             console.error('Error cancelling order:', error);
-            toast.error('Failed to cancel order: ' + error.message);
+            // Removed toast error notification here to prevent duplicate notifications
             setLoading(false);
             return { success: false, error };
         }
