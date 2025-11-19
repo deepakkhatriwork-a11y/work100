@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "visitors": {
+      ".read": true,
+      ".write": true,
+      "$visitor_id": {
+        ".validate": "newData.hasChildren(['timestamp', 'lastActive'])"
+      }
+    }
+  }
+}
