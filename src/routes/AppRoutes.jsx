@@ -24,6 +24,7 @@ import { Register } from '../pages/auth/Register';
 import Unauthorized from '../pages/unauthorized/Unauthorized';
 import NoPage from '../pages/nopage/NoPage';
 import FirebaseDiagnostics from '../pages/FirebaseDiagnostics';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
 
 const AppRoutes = () => {
@@ -88,6 +89,7 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/products/:id" element={<ProductInfo />} />
       <Route path="/firebase-diagnostics" element={<FirebaseDiagnostics />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="*" element={<NoPage />} />
     </Routes>
   );

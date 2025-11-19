@@ -1,33 +1,39 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     // Allow public read access to products
     match /products/{document} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com');
     }
     
-    // Allow authenticated users to read and write their own orders
+    // Allow authenticated users to create orders and read their own orders
     match /orders/{document} {
-      allow read: if request.auth != null && request.auth.uid == resource.data.userid;
+      allow read: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com' || request.auth.uid == resource.data.userid);
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userid;
+      // Allow users to update their own orders (needed for cancellation)
+      allow update: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com' || request.auth.uid == resource.data.userid);
+      // Only admins can delete orders
+      allow delete: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com');
     }
     
     // Allow public read access to categories
     match /categories/{document} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com');
     }
     
     // Allow users to read and write their own user data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /user/{userId} {
+      allow read: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com' || request.auth.uid == userId);
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com');
     }
     
-    // Allow admins to read and write all user data
+    // Allow admin to manage all user data
     match /users/{document} {
-      allow read, write: if request.auth != null && request.auth.token.admin == true;
+      allow read, write, delete: if request.auth != null && (request.auth.token.email == 'knupadhyay784@gmail.com' || request.auth.token.email == 'deepakkhatriwork@gmail.com');
     }
   }
 }

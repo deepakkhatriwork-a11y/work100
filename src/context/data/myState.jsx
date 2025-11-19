@@ -285,7 +285,7 @@ function MyState(props) {
             return { success: true };
         } catch (error) {
             console.error('Error cancelling order:', error);
-            toast.error('Failed to cancel order');
+            toast.error('Failed to cancel order: ' + error.message);
             setLoading(false);
             return { success: false, error };
         }

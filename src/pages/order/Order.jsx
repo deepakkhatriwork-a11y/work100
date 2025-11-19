@@ -85,6 +85,7 @@ function Order() {
   };
 
   // Function to add sample orders
+  /*
   const handleAddSampleOrders = async () => {
     if (user && user.id) {
       try {
@@ -100,6 +101,7 @@ function Order() {
       }
     }
   };
+  */
 
   // Function to cancel order
   const handleCancelOrder = async (orderId) => {
@@ -122,11 +124,21 @@ function Order() {
           }
           toast.success('Order successfully cancelled. Refund request sent to admin.');
         } else {
-          toast.error('Failed to cancel order. Please try again.');
+          // Check if it's a permission error
+          if (result.error && result.error.message && result.error.message.includes('permissions')) {
+            toast.error('You do not have permission to cancel this order. Please contact support.');
+          } else {
+            toast.error('Failed to cancel order. Please try again.');
+          }
         }
       } catch (error) {
         console.error('Error cancelling order:', error);
-        toast.error('Failed to cancel order. Please try again.');
+        // Check if it's a permission error
+        if (error.message && error.message.includes('permissions')) {
+          toast.error('You do not have permission to cancel this order. Please contact support.');
+        } else {
+          toast.error('Failed to cancel order. Please try again.');
+        }
       }
     }
   };
@@ -168,14 +180,6 @@ function Order() {
             >
               Refresh Orders
             </button>
-            {order.length === 0 && (
-              <button 
-                onClick={handleAddSampleOrders}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
-              >
-                Add Sample Orders
-              </button>
-            )}
           </div>
         </div>
         
@@ -241,12 +245,6 @@ function Order() {
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 Start Shopping
-              </button>
-              <button 
-                onClick={handleAddSampleOrders}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                Add Sample Orders
               </button>
             </div>
           </div>
