@@ -1,37 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiGrid, FiShoppingCart, FiFacebook, FiTwitter, FiInstagram, FiLinkedin, FiYoutube, FiGithub } from 'react-icons/fi'
+// Added imports for Firebase and visitor tracking
+import { getVisitorCount } from '../../utils/visitorTracker'
 
 function Footer() {
   const location = useLocation();
   const [visitorCount, setVisitorCount] = useState(0);
   const [mumbaiTime, setMumbaiTime] = useState('');
 
-  // Simulate real-time visitor count
+  // Real-time visitor count from Firebase
   useEffect(() => {
-    // Get initial count from localStorage or start at a random number
-    const savedCount = localStorage.getItem('visitorCount');
-    if (savedCount) {
-      setVisitorCount(parseInt(savedCount) + 1);
-    } else {
-      // Start with a random number between 1000 and 5000
-      const initialCount = Math.floor(Math.random() * 4000) + 1000;
-      setVisitorCount(initialCount);
-    }
-    
-    // Save the updated count
-    localStorage.setItem('visitorCount', visitorCount.toString());
-    
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setVisitorCount(prevCount => {
-        const newCount = prevCount + Math.floor(Math.random() * 3);
-        localStorage.setItem('visitorCount', newCount.toString());
-        return newCount;
-      });
-    }, 30000); // Update every 30 seconds
-    
-    return () => clearInterval(interval);
+    const unsubscribe = getVisitorCount((count) => {
+      setVisitorCount(count);
+    });
+
+    return () => {
+      // Cleanup listener if needed
+    };
   }, []);
 
   // Update Mumbai time every second
