@@ -250,12 +250,6 @@ function Dashboard() {
               >
                 Add Product
               </Link>
-              <Link
-                to="/add-requested-products"
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-green-600 to-teal-600 px-6 py-2 text-sm font-medium text-white hover:from-green-700 hover:to-teal-700 shadow-lg shadow-green-500/30 transition-all"
-              >
-                Add Sample Products
-              </Link>
               <button
                 onClick={fixImageUrls}
                 className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-yellow-600 to-orange-600 px-6 py-2 text-sm font-medium text-white hover:from-yellow-700 hover:to-orange-700 shadow-lg shadow-yellow-500/30 transition-all"

@@ -14,7 +14,6 @@ import DashboardTest from '../pages/admin/dashboard/DashboardTest';
 import FirebaseTest from '../pages/admin/dashboard/FirebaseTest';
 import AddProduct from '../pages/admin/pages/AddProduct';
 import AddOneRupeeItem from '../pages/admin/pages/AddOneRupeeItem';
-import AddSampleProducts from '../pages/admin/pages/AddSampleProducts';
 import AddRequestedProducts from '../pages/admin/pages/AddRequestedProducts';
 import UpdateProduct from '../pages/admin/pages/UpdateProduct';
 import ManageAdvertisements from '../pages/admin/pages/ManageAdvertisements';
@@ -79,11 +78,6 @@ const AppRoutes = () => {
       <Route path="/add-one-rupee-item" element={
         <ProtectedRoute requireAdmin={true}>
           <AddOneRupeeItem />
-        </ProtectedRoute>
-      } />
-      <Route path="/add-sample-products" element={
-        <ProtectedRoute requireAdmin={true}>
-          <AddSampleProducts />
         </ProtectedRoute>
       } />
       <Route path="/add-requested-products" element={
