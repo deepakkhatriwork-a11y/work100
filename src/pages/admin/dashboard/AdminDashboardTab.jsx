@@ -7,6 +7,8 @@ import { FaUser, FaCartPlus } from 'react-icons/fa';
 import { AiFillShopping, AiFillPlusCircle, AiFillDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { jsPDF } from "jspdf";
+import 'jspdf-autotable';
 
 function AdminDashboardTab() {
     const context = useContext(myContext)
@@ -62,6 +64,83 @@ function AdminDashboardTab() {
         } catch (error) {
             console.error('Error updating refund request:', error);
             toast.error('Failed to update refund request');
+        }
+    };
+
+    // Function to generate and download invoice
+    const downloadInvoice = (orderItem) => {
+        try {
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(20);
+            doc.text('INVOICE', 105, 20, null, null, 'center');
+            
+            // Add company info
+            doc.setFontSize(12);
+            doc.text('Titanium Store', 20, 30);
+            doc.text('Bikaner, Rajasthan, India', 20, 37);
+            doc.text('Email: contact@titaniumstore.com', 20, 44);
+            
+            // Add invoice info
+            doc.setFontSize(12);
+            doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 150, 30);
+            doc.text(`Order ID: ${orderItem.orderId || orderItem.id?.substring(0, 8) || orderItem.paymentId?.substring(0, 8) || 'N/A'}`, 150, 37);
+            doc.text(`Order Date: ${orderItem.date || 'N/A'}`, 150, 44);
+            
+            // Add customer info
+            doc.setFontSize(14);
+            doc.text('Bill To:', 20, 60);
+            doc.setFontSize(12);
+            doc.text(orderItem.addressInfo?.name || 'N/A', 20, 67);
+            doc.text(orderItem.addressInfo?.address || 'N/A', 20, 74);
+            doc.text(`${orderItem.addressInfo?.city || ''}, ${orderItem.addressInfo?.state || ''} ${orderItem.addressInfo?.pincode || ''}`, 20, 81);
+            doc.text(`Phone: ${orderItem.addressInfo?.phoneNumber || 'N/A'}`, 20, 88);
+            
+            // Add items table
+            const tableColumn = ["#", "Item", "Quantity", "Price", "Total"];
+            const tableRows = [];
+            
+            orderItem.cartItems?.forEach((item, index) => {
+                const itemData = [
+                    index + 1,
+                    item.title || item.name || 'Unknown Item',
+                    item.quantity || 1,
+                    `₹${item.price || 0}`,
+                    `₹${(item.price || 0) * (item.quantity || 1)}`
+                ];
+                tableRows.push(itemData);
+            });
+            
+            // Add shipping charges row if applicable
+            if (orderItem.shippingCharges > 0) {
+                tableRows.push(['', '', '', 'Shipping Charges', `₹${orderItem.shippingCharges}`]);
+            }
+            
+            // Add total row
+            tableRows.push(['', '', '', 'Total Amount', `₹${orderItem.totalAmount || orderItem.total || 0}`]);
+            
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 95,
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [66, 66, 66] },
+                theme: 'grid'
+            });
+            
+            // Add payment method
+            const finalY = doc.lastAutoTable.finalY;
+            doc.text(`Payment Method: ${orderItem.paymentMethod || 'N/A'}`, 20, finalY + 10);
+            doc.text(`Payment Status: ${orderItem.status || 'Processing'}`, 20, finalY + 17);
+            
+            // Save the PDF
+            doc.save(`invoice-${orderItem.orderId || orderItem.id?.substring(0, 8) || orderItem.paymentId?.substring(0, 8) || 'order'}.pdf`);
+            
+            toast.success('Invoice downloaded successfully!');
+        } catch (error) {
+            console.error('Error generating invoice:', error);
+            toast.error('Failed to generate invoice');
         }
     };
 
@@ -258,6 +337,18 @@ function AdminDashboardTab() {
                                                         <p className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>{orderItem.paymentMethod}</p>
                                                     </div>
                                                 )}
+                                                <div className="flex justify-between mt-2">
+                                                    <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>Order Status</p>
+                                                    <p className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>{orderItem.status || 'Processing'}</p>
+                                                </div>
+                                                <div className="mt-4">
+                                                    <button
+                                                        onClick={() => downloadInvoice(orderItem)}
+                                                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                                    >
+                                                        Download Invoice
+                                                    </button>
+                                                </div>
                                             </div>
                                             
                                             <div className="border-t border-gray-200 pt-4 mt-4" style={{ borderColor: mode === 'dark' ? 'rgb(75 85 99)' : '' }}>
