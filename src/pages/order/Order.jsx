@@ -211,7 +211,7 @@ function Order() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div>
                       <h3 className="font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>
-                        Refund for Order #{refund.orderId?.substring(0, 8) || 'N/A'}
+                        Refund for Order #{refund.orderId || 'N/A'}
                       </h3>
                       <p className="text-sm text-gray-500" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                         Requested on {refund.requestDate ? new Date(refund.requestDate).toLocaleDateString() : 'N/A'}

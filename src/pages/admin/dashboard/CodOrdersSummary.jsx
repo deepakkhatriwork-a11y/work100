@@ -86,7 +86,7 @@ function CodOrdersSummary() {
             {codOrders.slice(0, 3).map((order) => (
               <div key={order.id} className="flex items-center justify-between text-sm">
                 <div>
-                  <p className="font-medium text-gray-900">#{order.id?.substring(0, 6) || 'N/A'}</p>
+                  <p className="font-medium text-gray-900">#{order.orderId || order.id?.substring(0, 6) || 'N/A'}</p>
                   <p className="text-gray-500">{order.customerName || 'Customer'}</p>
                 </div>
                 <div className="text-right">

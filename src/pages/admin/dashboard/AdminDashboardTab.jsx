@@ -522,7 +522,7 @@ function AdminDashboardTab() {
                                             <tr key={index} className="bg-gray-50 border-b dark:border-gray-700" style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '' }}>
                                                 <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>{index + 1}.</td>
                                                 <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
-                                                    {refund.orderId?.substring(0, 8) || 'N/A'}
+                                                    {refund.orderId || 'N/A'}
                                                 </td>
                                                 <td className="px-6 py-4 text-black" style={{ color: mode === 'dark' ? 'white' : '' }}>
                                                     {refund.userName || 'N/A'}
