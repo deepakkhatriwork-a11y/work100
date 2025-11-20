@@ -172,6 +172,15 @@ function MyState(props) {
             querySnapshot.forEach((doc) => {
                 ordersArray.push({ id: doc.id, ...doc.data() });
             });
+            
+            // Sort orders by date (most recent first)
+            ordersArray.sort((a, b) => {
+                // Try to parse dates, fallback to orderTimestamp if available
+                const dateA = new Date(a.date || a.orderTimestamp || 0);
+                const dateB = new Date(b.date || b.orderTimestamp || 0);
+                return dateB - dateA; // Descending order (newest first)
+            });
+            
             setOrder(ordersArray);
             setLoading(false);
         } catch (error) {
@@ -190,6 +199,15 @@ function MyState(props) {
             querySnapshot.forEach((doc) => {
                 ordersArray.push({ id: doc.id, ...doc.data() });
             });
+            
+            // Sort orders by date (most recent first)
+            ordersArray.sort((a, b) => {
+                // Try to parse dates, fallback to orderTimestamp if available
+                const dateA = new Date(a.date || a.orderTimestamp || 0);
+                const dateB = new Date(b.date || b.orderTimestamp || 0);
+                return dateB - dateA; // Descending order (newest first)
+            });
+            
             setOrder(ordersArray);
             setLoading(false);
             return { success: true, data: ordersArray };

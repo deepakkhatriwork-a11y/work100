@@ -257,6 +257,21 @@ function Order() {
                     <div>
                       <h2 className="text-lg font-semibold text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>
                         Order #{orderItem.orderId || orderItem.id?.substring(0, 8) || orderItem.paymentId?.substring(0, 8) || 'N/A'}
+                        {/* Show "NEW" badge for orders placed in the last 24 hours */}
+                        {(() => {
+                          const orderDate = new Date(orderItem.date || orderItem.orderTimestamp);
+                          const now = new Date();
+                          const diffHours = Math.abs(now - orderDate) / 36e5; // 36e5 is the number of milliseconds in an hour
+                          
+                          if (diffHours <= 24) {
+                            return (
+                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                NEW
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </h2>
                       <p className="text-sm text-gray-500" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                         {formatDate(orderItem.date)}
