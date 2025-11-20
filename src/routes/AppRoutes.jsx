@@ -8,6 +8,8 @@ import Cart from '../pages/cart/Cart';
 import Checkout from '../pages/checkout/Checkout';
 import Wishlist from '../pages/wishlist/Wishlist';
 import Dashboard from '../pages/admin/dashboard/Dashboard';
+import AdminDashboardTab from '../pages/admin/dashboard/AdminDashboardTab';
+import TestOrders from '../pages/admin/dashboard/TestOrders';
 import DashboardTest from '../pages/admin/dashboard/DashboardTest';
 import FirebaseTest from '../pages/admin/dashboard/FirebaseTest';
 import AddProduct from '../pages/admin/pages/AddProduct';
@@ -47,6 +49,16 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={
         <ProtectedRoute requireAdmin={true}>
           <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin-dashboard" element={
+        <ProtectedRoute requireAdmin={true}>
+          <AdminDashboardTab />
+        </ProtectedRoute>
+      } />
+      <Route path="/test-orders" element={
+        <ProtectedRoute requireAdmin={true}>
+          <TestOrders />
         </ProtectedRoute>
       } />
       <Route path="/dashboard-test" element={

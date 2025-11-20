@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
+import CodOrdersTab from './CodOrdersTab';
 
 function AdminDashboardTab() {
     const context = useContext(myContext)
@@ -17,12 +18,20 @@ function AdminDashboardTab() {
     const [refundRequestsError, setRefundRequestsError] = useState(null);
     
     useEffect(() => {
-        getOrderData();
+        console.log('AdminDashboardTab mounted, fetching data...');
+        getOrderData()
+            .then(result => {
+                console.log('Orders fetch result:', result);
+                if (result.success) {
+                    console.log('Orders data:', result.data);
+                }
+            });
         getUserData();
         
         // Try to fetch refund requests, but handle errors gracefully
         getRefundRequests()
             .then(result => {
+                console.log('Refund requests fetch result:', result);
                 if (!result.success) {
                     setRefundRequestsError(result.error);
                 }
@@ -70,6 +79,7 @@ function AdminDashboardTab() {
     // Function to generate and download invoice
     const downloadInvoice = (orderItem) => {
         try {
+            console.log('Generating invoice for order:', orderItem); // Debug log
             const doc = new jsPDF();
             
             // Add title
@@ -92,10 +102,10 @@ function AdminDashboardTab() {
             doc.setFontSize(14);
             doc.text('Bill To:', 20, 60);
             doc.setFontSize(12);
-            doc.text(orderItem.addressInfo?.name || 'N/A', 20, 67);
-            doc.text(orderItem.addressInfo?.address || 'N/A', 20, 74);
-            doc.text(`${orderItem.addressInfo?.city || ''}, ${orderItem.addressInfo?.state || ''} ${orderItem.addressInfo?.pincode || ''}`, 20, 81);
-            doc.text(`Phone: ${orderItem.addressInfo?.phoneNumber || 'N/A'}`, 20, 88);
+            doc.text(orderItem.addressInfo?.name || orderItem.address?.name || 'N/A', 20, 67);
+            doc.text(orderItem.addressInfo?.address || orderItem.address?.address || 'N/A', 20, 74);
+            doc.text(`${orderItem.addressInfo?.city || orderItem.address?.city || ''}, ${orderItem.addressInfo?.state || orderItem.address?.state || ''} ${orderItem.addressInfo?.pincode || orderItem.address?.pincode || ''}`, 20, 81);
+            doc.text(`Phone: ${orderItem.addressInfo?.phoneNumber || orderItem.address?.phoneNumber || 'N/A'}`, 20, 88);
             
             // Add items table
             const tableColumn = ["#", "Item", "Quantity", "Price", "Total"];
@@ -120,6 +130,7 @@ function AdminDashboardTab() {
             // Add total row
             tableRows.push(['', '', '', 'Total Amount', `₹${orderItem.totalAmount || orderItem.total || 0}`]);
             
+            console.log('Generating table with data:', { tableColumn, tableRows }); // Debug log
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
@@ -131,16 +142,19 @@ function AdminDashboardTab() {
             
             // Add payment method
             const finalY = doc.lastAutoTable.finalY;
+            console.log('Final Y position:', finalY); // Debug log
             doc.text(`Payment Method: ${orderItem.paymentMethod || 'N/A'}`, 20, finalY + 10);
             doc.text(`Payment Status: ${orderItem.status || 'Processing'}`, 20, finalY + 17);
             
             // Save the PDF
-            doc.save(`invoice-${orderItem.orderId || orderItem.id?.substring(0, 8) || orderItem.paymentId?.substring(0, 8) || 'order'}.pdf`);
+            const filename = `invoice-${orderItem.orderId || orderItem.id?.substring(0, 8) || orderItem.paymentId?.substring(0, 8) || 'order'}.pdf`;
+            console.log('Saving PDF with filename:', filename); // Debug log
+            doc.save(filename);
             
             toast.success('Invoice downloaded successfully!');
         } catch (error) {
             console.error('Error generating invoice:', error);
-            toast.error('Failed to generate invoice');
+            toast.error('Failed to generate invoice: ' + error.message);
         }
     };
 
@@ -176,6 +190,16 @@ function AdminDashboardTab() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Refunds
+                            </div>
+                        </button>
+                    </Tab>
+                    <Tab>
+                        <button type="button" className="font-medium border-b-2 border-blue-500 bg-[#605d5d12] text-blue-500 rounded-lg text-xl hover:shadow-blue-700 shadow-[inset_0_0_8px_rgba(0,0,0,0.6)] px-5 py-1.5 text-center w-full">
+                            <div className="flex gap-2 items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m-1.5-1.5h.75c.414 0 .75.336.75.75v.75H18a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75v-.75H12.75Z" />
+                                </svg>
+                                COD Orders
                             </div>
                         </button>
                     </Tab>
@@ -262,10 +286,10 @@ function AdminDashboardTab() {
 
                 {/* Orders Tab */}
                 <TabPanel>
-                    <div className="relative overflow-x-auto mb-16">
+                    <div className="mb-16">
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-center mb-5 text-3xl font-semibold underline" style={{ color: mode === 'dark' ? 'white' : '' }}>Order Details</h1>
-                            <div className="flex gap-2">
+                            <div>
                                 <button 
                                     onClick={getOrderData}
                                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
@@ -273,6 +297,11 @@ function AdminDashboardTab() {
                                     Refresh Orders
                                 </button>
                             </div>
+                        </div>
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-500">Total orders: {order.length}</p>
+                            {/* Debug info */}
+                            <p className="text-xs text-gray-400 mt-1">Debug: {JSON.stringify(order.slice(0, 2))}</p>
                         </div>
                         {order.length === 0 ? (
                             <div className="text-center py-8">
@@ -312,6 +341,9 @@ function AdminDashboardTab() {
                                                     <p className="text-sm text-gray-500" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                                                         {orderItem.date || 'N/A'}
                                                     </p>
+                                                    <p className="text-xs text-gray-400 mt-1">
+                                                        User ID: {orderItem.userid || 'N/A'}
+                                                    </p>
                                                 </div>
                                                 <div className="mt-2 md:mt-0">
                                                     <select 
@@ -326,6 +358,11 @@ function AdminDashboardTab() {
                                                         <option value="Cancelled">Cancelled</option>
                                                     </select>
                                                 </div>
+                                            </div>
+                                            
+                                            {/* Debug: Show order item structure */}
+                                            <div className="text-xs text-gray-500 mt-2">
+                                                Order ID: {orderItem.id} | Payment Method: {orderItem.paymentMethod || 'N/A'}
                                             </div>
                                             
                                             <div className="border-t border-gray-200 pt-4" style={{ borderColor: mode === 'dark' ? 'rgb(75 85 99)' : '' }}>
@@ -356,12 +393,12 @@ function AdminDashboardTab() {
                                                     <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>Total</p>
                                                     <p className="text-lg font-semibold text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>₹{orderItem.totalAmount || orderItem.total || 'N/A'}</p>
                                                 </div>
-                                                {orderItem.paymentMethod && (
-                                                    <div className="flex justify-between mt-2">
-                                                        <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>Payment Method</p>
-                                                        <p className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>{orderItem.paymentMethod}</p>
-                                                    </div>
-                                                )}
+                                                <div className="flex justify-between mt-2">
+                                                    <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>Payment Method</p>
+                                                    <p className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>
+                                                        {orderItem.paymentMethod || 'N/A'}
+                                                    </p>
+                                                </div>
                                                 <div className="flex justify-between mt-2">
                                                     <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>Order Status</p>
                                                     <p className="text-sm font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>{orderItem.status || 'Processing'}</p>
@@ -379,10 +416,10 @@ function AdminDashboardTab() {
                                             <div className="border-t border-gray-200 pt-4 mt-4" style={{ borderColor: mode === 'dark' ? 'rgb(75 85 99)' : '' }}>
                                                 <h3 className="text-md font-medium text-gray-900 mb-2" style={{ color: mode === 'dark' ? 'white' : '' }}>Shipping Information</h3>
                                                 <div className="text-sm text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>
-                                                    <p>{orderItem.addressInfo?.name || 'N/A'}</p>
-                                                    <p>{orderItem.addressInfo?.address || 'N/A'}</p>
-                                                    <p>{orderItem.addressInfo?.pincode || 'N/A'}</p>
-                                                    <p>Phone: {orderItem.addressInfo?.phoneNumber || 'N/A'}</p>
+                                                    <p>{orderItem.addressInfo?.name || orderItem.address?.name || 'N/A'}</p>
+                                                    <p>{orderItem.addressInfo?.address || orderItem.address?.address || 'N/A'}</p>
+                                                    <p>{orderItem.addressInfo?.pincode || orderItem.address?.pincode || 'N/A'}</p>
+                                                    <p>Phone: {orderItem.addressInfo?.phoneNumber || orderItem.address?.phoneNumber || 'N/A'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -536,7 +573,12 @@ function AdminDashboardTab() {
                         </div>
                     </div>
                 </TabPanel>
-            </Tabs>
+
+                {/* COD Orders Tab */}
+                <TabPanel>
+                  <CodOrdersTab />
+                </TabPanel>
+              </Tabs>
         </div>
     )
 }

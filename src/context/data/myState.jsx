@@ -4,7 +4,7 @@ import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, where, g
 import { fireDB } from '../../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 
-function MyState(props) {
+const MyState = (props) => {
     const [mode, setMode] = useState('light');
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
@@ -15,6 +15,19 @@ function MyState(props) {
     const [order, setOrder] = useState([]);
     const [user, setUser] = useState([]);
     const [refundRequests, setRefundRequests] = useState([]);
+
+    // Log when order state changes
+    useEffect(() => {
+        console.log('Order state updated:', order);
+    }, [order]);
+
+    // Fetch products when component mounts
+    useEffect(() => {
+        getProduct();
+        getUserData();
+        getOrderData();
+        getRefundRequests();
+    }, []);
 
     const toggleMode = () => {
         if (mode === 'light') {
@@ -167,6 +180,7 @@ function MyState(props) {
     const getOrderData = async () => {
         setLoading(true);
         try {
+            console.log('Fetching all orders from Firestore...');
             const querySnapshot = await getDocs(collection(fireDB, 'orders'));
             const ordersArray = [];
             querySnapshot.forEach((doc) => {
@@ -181,11 +195,14 @@ function MyState(props) {
                 return dateB - dateA; // Descending order (newest first)
             });
             
+            console.log('Fetched orders:', ordersArray); // Debug log
             setOrder(ordersArray);
             setLoading(false);
+            return { success: true, data: ordersArray };
         } catch (error) {
             console.error('Error fetching orders:', error);
             setLoading(false);
+            return { success: false, error };
         }
     };
 
@@ -193,6 +210,7 @@ function MyState(props) {
     const getUserOrders = async (userId) => {
         setLoading(true);
         try {
+            console.log('Fetching orders for user:', userId);
             const q = query(collection(fireDB, 'orders'), where('userid', '==', userId));
             const querySnapshot = await getDocs(q);
             const ordersArray = [];
@@ -208,6 +226,7 @@ function MyState(props) {
                 return dateB - dateA; // Descending order (newest first)
             });
             
+            console.log('Fetched user orders:', ordersArray); // Debug log
             setOrder(ordersArray);
             setLoading(false);
             return { success: true, data: ordersArray };
@@ -402,20 +421,13 @@ function MyState(props) {
         }
     };
 
-    // Fetch products when component mounts
-    useEffect(() => {
-        getProduct();
-        getUserData();
-        getOrderData();
-        getRefundRequests();
-    }, []);
-
     const contextValue = useMemo(() => ({
         mode,
         toggleMode,
         loading,
         setLoading,
         products,
+        setProducts,
         filteredProducts,
         setFilteredProducts,
         searchkey, 
@@ -425,11 +437,13 @@ function MyState(props) {
         filterPrice, 
         setFilterPrice,
         order,
+        setOrder,
         getOrderData,
         getUserOrders,
         updateOrder,
         deleteOrder,
         user,
+        setUser,
         getUserData,
         refundRequests,
         setRefundRequests,
@@ -445,6 +459,6 @@ function MyState(props) {
             {props.children}
         </myContext.Provider>
     );
-}
+};
 
 export default MyState;

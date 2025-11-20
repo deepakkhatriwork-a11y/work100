@@ -20,13 +20,25 @@ function Order() {
   const fetchUserOrders = useCallback(async () => {
     if (isAuthenticated && user && user.id) {
       console.log('Fetching orders for user:', user.id);
-      await getUserOrders(user.id);
+      const result = await getUserOrders(user.id);
+      console.log('User orders result:', result);
+      
+      // Debug: Check if specific order #48333762 is in the results
+      if (result.success && result.data) {
+        const targetOrder = result.data.find(order => order.id && order.id.includes('48333762'));
+        if (targetOrder) {
+          console.log('Found target order #48333762:', targetOrder);
+        } else {
+          console.log('Target order #48333762 not found in user orders');
+        }
+      }
       
       // Try to fetch refund requests for the user
       // Note: This may fail with permission denied for regular users due to Firebase security rules
       // This is expected behavior - admins can see all refund requests, but regular users cannot
       try {
         const refundResult = await getUserRefundRequests(user.id);
+        console.log('User refund requests result:', refundResult);
         if (refundResult.success) {
           setUserRefundRequests(refundResult.data);
         }
@@ -183,6 +195,10 @@ function Order() {
           </div>
         </div>
         
+        <div className="mb-4">
+          <p className="text-sm text-gray-500">Total orders: {order.length}</p>
+        </div>
+        
         {/* Refund Requests Section */}
         {userRefundRequests.length > 0 && (
           <div className="mb-8">
@@ -272,6 +288,12 @@ function Order() {
                           }
                           return null;
                         })()}
+                        {/* Debug: Highlight the specific order */}
+                        {(orderItem.id && orderItem.id.includes('48333762')) && (
+                          <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                            TARGET ORDER #48333762
+                          </span>
+                        )}
                       </h2>
                       <p className="text-sm text-gray-500" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                         {formatDate(orderItem.date)}
@@ -335,6 +357,16 @@ function Order() {
                       <p className="text-sm text-gray-500" style={{ color: mode === 'dark' ? 'gray' : '' }}>
                         {orderItem.addressInfo?.address || orderItem.address?.address || ''}, {orderItem.addressInfo?.city || orderItem.address?.city || ''}, {orderItem.addressInfo?.state || orderItem.address?.state || ''} {orderItem.addressInfo?.pincode || orderItem.address?.pincode || ''}
                       </p>
+                      {orderItem.paymentMethod && (
+                        <p className="text-sm text-gray-500 mt-1" style={{ color: mode === 'dark' ? 'gray' : '' }}>
+                          Payment Method: {orderItem.paymentMethod}
+                          {orderItem.paymentMethod.toLowerCase().includes('cash') || orderItem.paymentMethod.toLowerCase().includes('cod') ? (
+                            <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              COD
+                            </span>
+                          ) : null}
+                        </p>
+                      )}
                     </div>
                     <div className="mt-4 md:mt-0 text-right">
                       <p className="text-gray-600" style={{ color: mode === 'dark' ? 'gray' : '' }}>

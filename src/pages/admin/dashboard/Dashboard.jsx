@@ -8,6 +8,7 @@ import { db } from '../../../firebase/firebaseConfig'
 import { formatCurrency, formatDate, calculateTotalRevenue, normalizeOrderData } from '../../../utils/firebaseUtils'
 import DeployRulesInstructions from '../../../components/DeployRulesInstructions'
 import { FiEye } from 'react-icons/fi'
+import CodOrdersSummary from './CodOrdersSummary'
 
 // Sample data for when Firebase is not accessible
 const sampleStats = [
@@ -57,6 +58,7 @@ function Dashboard() {
   
   const [stats, setStats] = useState(sampleStats)
   const [recentOrders, setRecentOrders] = useState(sampleRecentOrders)
+  const [codOrders, setCodOrders] = useState([]) // New state for COD orders
   const [products, setProducts] = useState(sampleProducts)
   const [inventory, setInventory] = useState(sampleInventory)
   const [loading, setLoading] = useState(true)
@@ -74,6 +76,7 @@ function Dashboard() {
         console.log('No user logged in, showing sample data')
         setStats(sampleStats)
         setRecentOrders(sampleRecentOrders)
+        setCodOrders([]) // Initialize COD orders as empty
         setProducts(sampleProducts)
         setInventory(sampleInventory)
         setFirebaseError(true)
@@ -103,7 +106,19 @@ function Dashboard() {
         ...doc.data()
       })).map(normalizeOrderData) // Normalize order data
       
+      // Debug: Log fetched orders
+      console.log('Fetched orders for dashboard:', ordersData)
+      
       setRecentOrders(ordersData)
+      
+      // Filter COD orders
+      const codOrdersData = ordersData.filter(order => 
+        order.paymentMethod && 
+        (order.paymentMethod.toLowerCase().includes('cash') || 
+         order.paymentMethod.toLowerCase().includes('cod') ||
+         order.paymentMethod === 'COD')
+      )
+      setCodOrders(codOrdersData)
       
       // Fetch Users count
       const usersSnapshot = await getDocs(collection(db, 'users'))
@@ -134,11 +149,7 @@ function Dashboard() {
       const totalOrders = ordersData.length
       
       // Calculate payment method stats
-      const codOrders = ordersData.filter(order => 
-        order.paymentMethod === 'Cash on Delivery' || 
-        order.paymentMethod === 'cod' ||
-        order.paymentMethod === 'COD'
-      ).length
+      const codOrderCount = codOrdersData.length
       
       // Calculate state distribution
       const stateDistribution = {}
@@ -185,6 +196,7 @@ function Dashboard() {
       // Use sample data when Firebase is not accessible
       setStats(sampleStats)
       setRecentOrders(sampleRecentOrders)
+      setCodOrders([]) // Initialize COD orders as empty
       setProducts(sampleProducts)
       setInventory(sampleInventory)
       setFirebaseError(true)
@@ -307,7 +319,13 @@ function Dashboard() {
                     <div key={order.id} className="px-6 py-4 flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">{order.customerName}</p>
-                        <p className="text-sm text-gray-500">#{order.id?.slice(0, 8) || 'N/A'} • {formatDate(order.date)}</p>
+                        <p className="text-sm text-gray-500">
+                          #{order.orderId || order.id?.slice(0, 8) || 'N/A'} • {formatDate(order.date)}
+                        </p>
+                        {/* Debug: Highlight the specific order */}
+                        {(order.id && order.id.includes('48333762')) && (
+                          <p className="text-xs text-red-500 font-bold">TARGET ORDER #48333762</p>
+                        )}
                         {order.addressInfo?.state && (
                           <p className="text-sm text-gray-500">State: {order.addressInfo.state}</p>
                         )}
@@ -317,7 +335,11 @@ function Dashboard() {
                         <div className="flex items-center justify-end gap-2 mt-1">
                           <StatusBadge status={order.status || 'Pending'} />
                           {order.paymentMethod && (
-                            <span className="text-xs text-gray-500">
+                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              order.paymentMethod === 'Cash on Delivery' || 
+                              order.paymentMethod.toLowerCase().includes('cod') ? 
+                              'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
                               {order.paymentMethod === 'Cash on Delivery' ? 'COD' : order.paymentMethod}
                             </span>
                           )}
@@ -329,7 +351,7 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Inventory and State Distribution */}
+            {/* Inventory and COD Orders Summary */}
             <div className="space-y-6">
               {/* Inventory */}
               <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 space-y-5">
@@ -362,6 +384,11 @@ function Dashboard() {
                   )}
                 </div>
               </div>
+              
+              {/* COD Orders Summary */}
+              {!loading && !showSampleData && (
+                <CodOrdersSummary />
+              )}
             </div>
           </div>
 

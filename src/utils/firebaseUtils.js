@@ -81,6 +81,7 @@ export const normalizeOrderData = (order) => {
   
   return {
     id: order.id || order.orderId || '',
+    orderId: order.orderId || order.id || '',
     customerName: order.customerName || order.name || order.addressInfo?.name || 'Customer',
     totalAmount: order.totalAmount || order.total || order.amount || 0,
     status: order.status || 'Pending',
