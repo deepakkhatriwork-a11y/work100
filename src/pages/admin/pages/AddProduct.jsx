@@ -12,7 +12,7 @@ function AddProduct() {
     const [product, setProduct] = useState({
         title: '',
         price: '',
-        imageUrl: '',
+        imageUrls: ['', '', '', '', ''], // Support for 5 images
         category: '',
         description: '',
         stock: 0,
@@ -26,12 +26,37 @@ function AddProduct() {
         });
     };
 
+    // Handle image URL changes
+    const handleImageChange = (index, value) => {
+        const newImageUrls = [...product.imageUrls];
+        newImageUrls[index] = value;
+        setProduct({
+            ...product,
+            imageUrls: newImageUrls
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         // Validation
-        if (!product.title || !product.price || !product.imageUrl || !product.category || !product.description) {
+        if (!product.title || !product.price || !product.category || !product.description) {
             toast.error('Please fill all required fields', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+            });
+            return;
+        }
+
+        // Check if at least one image is provided
+        const hasImage = product.imageUrls.some(url => url.trim() !== '');
+        if (!hasImage) {
+            toast.error('Please provide at least one image URL', {
                 position: "top-right",
                 autoClose: 2000,
                 hideProgressBar: true,
@@ -56,7 +81,7 @@ function AddProduct() {
                 setProduct({
                     title: '',
                     price: '',
-                    imageUrl: '',
+                    imageUrls: ['', '', '', '', ''],
                     category: '',
                     description: '',
                     stock: 0,
@@ -103,16 +128,20 @@ function AddProduct() {
                             />
                         </div>
 
+                        {/* Multiple Image URLs */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-medium mb-2">Product Image URL</label>
-                            <input
-                                type="text"
-                                name="imageUrl"
-                                value={product.imageUrl}
-                                onChange={handleChange}
-                                className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter image URL"
-                            />
+                            <label className="block text-gray-700 text-sm font-medium mb-2">Product Images (Up to 5)</label>
+                            {[0, 1, 2, 3, 4].map((index) => (
+                                <div key={index} className="mb-2">
+                                    <input
+                                        type="text"
+                                        value={product.imageUrls[index]}
+                                        onChange={(e) => handleImageChange(index, e.target.value)}
+                                        className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder={`Enter image URL ${index + 1}`}
+                                    />
+                                </div>
+                            ))}
                         </div>
 
                         <div className="mb-4">

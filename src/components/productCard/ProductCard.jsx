@@ -23,11 +23,17 @@ function ProductCard() {
 
     // add to wishlist
     const addWishlist = (product) => {
+        // Get the first image from imageUrls array or fallback to imageUrl/image
+        const firstImage = (product.imageUrls && product.imageUrls[0]) || 
+                          product.imageUrl || 
+                          product.image || 
+                          'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+        
         const wishlistItem = {
             id: product.id,
             name: product.title,
             price: product.price,
-            image: product.imageUrl || product.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'
+            image: firstImage
         };
         dispatch(addToWishlist(wishlistItem));
         toast.success('Added to wishlist');
@@ -149,9 +155,12 @@ function ProductCard() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {displayProducts.map((item, index) => {
-                            const { id, title, price, description, imageUrl, image } = item;
-                            // Fallback to 'image' property if 'imageUrl' is not available
-                            const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                            const { id, title, price, description, imageUrl, image, imageUrls } = item;
+                            // Get the first image from imageUrls array or fallback to imageUrl/image
+                            const productImageUrl = (imageUrls && imageUrls[0]) || 
+                                                   imageUrl || 
+                                                   image || 
+                                                   'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                             
                             // Handle image loading errors with better fallback
                             const handleImageError = (e) => {

@@ -40,7 +40,8 @@ function Filter() {
     }
 
     return (
-        <div className='container mx-auto px-4 mt-5'>
+        // Extended width container
+        <div className='container mx-auto px-2 sm:px-4 mt-5 w-full max-w-full'>
             <div className="p-5 rounded-lg bg-gray-100 drop-shadow-xl border border-gray-200"
                 style={{ 
                     backgroundColor: mode === 'dark' ? '#282c34' : '', 
@@ -92,7 +93,8 @@ function Filter() {
                     )}
                 </div>
                 <div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                    {/* Single line layout with equal width for all filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
                         <select 
                             value={filterType} 
                             onChange={(e) => setFilterType(e.target.value)} 
@@ -126,6 +128,8 @@ function Filter() {
                             <option value="5001-10000">₹5001 - ₹10000</option>
                             <option value="10001+">₹10001+</option>
                         </select>
+                        {/* Hidden element to maintain grid structure - can be used for additional filters */}
+                        <div className="hidden md:block"></div>
                     </div>
                 </div>
             </div>
@@ -133,4 +137,4 @@ function Filter() {
     )
 }
 
-export default Filter
+export default Filter;

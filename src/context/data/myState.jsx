@@ -96,6 +96,87 @@ const MyState = (props) => {
         }
     };
 
+    // Update Product Function
+    const updateProduct = async (id, updatedProduct) => {
+        setLoading(true);
+        try {
+            const productRef = doc(fireDB, 'products', id);
+            await updateDoc(productRef, updatedProduct);
+            toast.success('Product updated successfully');
+            getProduct(); // Refresh products list
+            setLoading(false);
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating product:', error);
+            toast.error('Failed to update product');
+            setLoading(false);
+            return { success: false, error };
+        }
+    };
+
+    // Get Single Product Function
+    const getSingleProduct = async (id) => {
+        setLoading(true);
+        try {
+            const productDoc = await getDoc(doc(fireDB, 'products', id));
+            if (productDoc.exists()) {
+                const productData = { id: productDoc.id, ...productDoc.data() };
+                setLoading(false);
+                return { success: true, data: productData };
+            } else {
+                toast.error('Product not found');
+                setLoading(false);
+                return { success: false, error: 'Product not found' };
+            }
+        } catch (error) {
+            console.error('Error fetching product:', error);
+            toast.error('Failed to fetch product');
+            setLoading(false);
+            return { success: false, error };
+        }
+    };
+
+    // Function to update product images to use local images
+    const updateProductImages = async () => {
+        setLoading(true);
+        try {
+            const querySnapshot = await getDocs(collection(fireDB, 'products'));
+            const updates = [];
+            
+            querySnapshot.forEach((doc) => {
+                const productData = doc.data();
+                let updatedImageUrl = productData.imageUrl;
+                
+                // Update Arduino products to use uno.jpg
+                if (productData.title && productData.title.toLowerCase().includes('arduino')) {
+                    updatedImageUrl = '/uno.jpg';
+                }
+                // Update Battery products to use litium.jpg
+                else if (productData.title && productData.title.toLowerCase().includes('battery') || 
+                         productData.title && productData.title.toLowerCase().includes('lithium')) {
+                    updatedImageUrl = '/litium.jpg';
+                }
+                
+                // Only update if image URL has changed
+                if (updatedImageUrl !== productData.imageUrl) {
+                    updates.push(updateDoc(doc.ref, { imageUrl: updatedImageUrl }));
+                }
+            });
+            
+            // Execute all updates
+            await Promise.all(updates);
+            toast.success('Product images updated successfully');
+            getProduct(); // Refresh products list
+            setLoading(false);
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating product images:', error);
+            toast.error('Failed to update product images');
+            setLoading(false);
+            return { success: false, error };
+        }
+    };
+
     // Add Sample Orders Function
     const addSampleOrders = async (userId) => {
         setLoading(true);
@@ -279,28 +360,37 @@ const MyState = (props) => {
             const querySnapshot = await getDocs(collection(fireDB, 'users'));
             const usersArray = [];
             querySnapshot.forEach((doc) => {
-                usersArray.push({ uid: doc.id, ...doc.data() });
+                usersArray.push({ id: doc.id, ...doc.data() });
             });
             setUser(usersArray);
             setLoading(false);
-            return { success: true, data: usersArray };
         } catch (error) {
             console.error('Error fetching users:', error);
+            setLoading(false);
+        }
+    };
+
+    // Delete Product Function
+    const deleteProduct = async (id) => {
+        setLoading(true);
+        try {
+            await deleteDoc(doc(fireDB, 'products', id));
+            toast.success('Product deleted successfully');
+            getProduct(); // Refresh products list
+            setLoading(false);
+            return { success: true };
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            toast.error('Failed to delete product');
             setLoading(false);
             return { success: false, error };
         }
     };
 
-    // Get Refund Requests Function (for admin users)
+    // Get Refund Requests Function
     const getRefundRequests = async () => {
-        // Skip if already loaded
-        if (refundRequests.length > 0) {
-            return { success: true, data: refundRequests };
-        }
-        
         setLoading(true);
         try {
-            console.log('Fetching refund requests from Firestore...');
             const querySnapshot = await getDocs(collection(fireDB, 'refundRequests'));
             const refundRequestsArray = [];
             querySnapshot.forEach((doc) => {
@@ -308,69 +398,26 @@ const MyState = (props) => {
             });
             setRefundRequests(refundRequestsArray);
             setLoading(false);
-            console.log('Fetched refund requests successfully:', refundRequestsArray);
-            return { success: true, data: refundRequestsArray };
         } catch (error) {
             console.error('Error fetching refund requests:', error);
             setLoading(false);
-            // Handle specific error types
-            if (error.code === 'permission-denied') {
-                console.error('Permission denied when fetching refund requests. Check Firebase security rules.');
-                // For regular users, this is expected behavior - they can't read refund requests directly
-                // due to Firebase security rules. We'll return an empty array instead of showing an error.
-                return { success: true, data: [] };
-            } else if (error.code === 'unavailable') {
-                console.error('Firebase unavailable when fetching refund requests.');
-                toast.error('Unable to connect to database. Please try again later.');
-                return { success: false, error: 'Unavailable' };
-            } else {
-                console.error('Unknown error when fetching refund requests:', error);
-                // For regular users, we don't show an error for permission issues
-                // as this is expected behavior
-                return { success: true, data: [] };
-            }
         }
     };
 
-    // Get Refund Requests for Current User Function (for regular users)
-    const getUserRefundRequests = async (userId = null) => {
+    // Add Refund Request Function
+    const addRefundRequest = async (refundData) => {
         setLoading(true);
         try {
-            console.log('Fetching user refund requests from Firestore...');
-            
-            // userId must be provided
-            if (!userId) {
-                console.log('No user ID provided, cannot fetch refund requests');
-                setLoading(false);
-                return { success: false, error: 'No user ID provided' };
-            }
-            
-            console.log('Current user ID for refund request filtering:', userId);
-            
-            // Query refund requests where userId matches the current user's ID
-            // Note: This will only work if Firestore rules allow it
-            const q = query(collection(fireDB, 'refundRequests'), where('userId', '==', userId));
-            const querySnapshot = await getDocs(q);
-            const refundRequestsArray = [];
-            querySnapshot.forEach((doc) => {
-                const refundData = { id: doc.id, ...doc.data() };
-                // Add a fallback for status if not present
-                if (!refundData.status) {
-                    refundData.status = 'Pending';
-                }
-                refundRequestsArray.push(refundData);
-            });
-            
-            console.log('User refund requests:', refundRequestsArray);
+            await addDoc(collection(fireDB, 'refundRequests'), refundData);
+            toast.success('Refund request submitted successfully');
+            getRefundRequests(); // Refresh refund requests list
             setLoading(false);
-            console.log('Fetched user refund requests successfully:', refundRequestsArray);
-            return { success: true, data: refundRequestsArray };
+            return { success: true };
         } catch (error) {
-            console.log('Expected permission error when fetching user refund requests (users cannot read refund requests directly):', error.message);
+            console.error('Error adding refund request:', error);
+            toast.error('Failed to submit refund request');
             setLoading(false);
-            // For regular users, this is expected behavior - they can't read refund requests directly
-            // due to Firebase security rules. We'll return an empty array instead of showing an error.
-            return { success: true, data: [] };
+            return { success: false, error };
         }
     };
 
@@ -390,7 +437,7 @@ const MyState = (props) => {
             setLoading(false);
             return { success: false, error };
         }
-    }
+    };
 
     const contextValue = useMemo(() => ({
         mode,
@@ -413,17 +460,32 @@ const MyState = (props) => {
         getUserOrders,
         updateOrder,
         deleteOrder,
+        addProduct,
+        deleteProduct,
+        getProduct,
+        updateProduct, // Added update product function
+        getSingleProduct, // Added get single product function
+        updateProductImages,
         user,
         setUser,
         getUserData,
         refundRequests,
         setRefundRequests,
         getRefundRequests,
-        getUserRefundRequests,
-        updateRefundRequest,
-        addProduct,
-        addSampleOrders
-    }), [mode, loading, products, filteredProducts, searchkey, filterType, filterPrice, order, user, refundRequests]);
+        addRefundRequest,
+        updateRefundRequest
+    }), [
+        mode, 
+        loading, 
+        products, 
+        filteredProducts, 
+        searchkey, 
+        filterType, 
+        filterPrice, 
+        order, 
+        user, 
+        refundRequests
+    ]);
 
     return (
         <myContext.Provider value={contextValue}>

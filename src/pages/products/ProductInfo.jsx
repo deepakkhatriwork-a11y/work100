@@ -46,11 +46,17 @@ function ProductInfo() {
     };
     
     const handleAddToWishlist = (item) => {
+        // Get the first image from imageUrls array or fallback to imageUrl/image
+        const firstImage = (item.imageUrls && item.imageUrls[0]) || 
+                          item.imageUrl || 
+                          item.image || 
+                          'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+        
         const wishlistItem = {
             id: item.id,
             name: item.title,
             price: item.price,
-            image: item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'
+            image: firstImage
         };
         dispatch(addToWishlist(wishlistItem));
         toast.success('Added to wishlist');
@@ -85,6 +91,12 @@ function ProductInfo() {
         );
     }
     
+    // Get all images for the product
+    const productImages = (product.imageUrls && product.imageUrls.filter(url => url)) || 
+                        (product.imageUrl ? [product.imageUrl] : []) || 
+                        (product.image ? [product.image] : []) || 
+                        ['https://placehold.co/400x400/cccccc/ffffff?text=No+Image'];
+    
     return (
         <Layout>
             <div className="container mx-auto px-4 py-8">
@@ -103,12 +115,34 @@ function ProductInfo() {
                     <div>
                         <div className="bg-gray-100 rounded-lg p-4 mb-4 flex items-center justify-center h-96">
                             <img 
-                                src={product.imageUrl || product.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'} 
+                                src={productImages[selectedImage]} 
                                 alt={product.title} 
                                 className="max-h-full max-w-full object-contain"
                                 onError={handleImageError}
                             />
                         </div>
+                        
+                        {/* Thumbnail images */}
+                        {productImages.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                                {productImages.map((img, index) => (
+                                    <div 
+                                        key={index}
+                                        onClick={() => setSelectedImage(index)}
+                                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden cursor-pointer border-2 ${
+                                            selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                                        }`}
+                                    >
+                                        <img 
+                                            src={img} 
+                                            alt={`${product.title} ${index + 1}`} 
+                                            className="w-full h-full object-cover"
+                                            onError={handleImageError}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     
                     {/* Product Details */}
@@ -221,7 +255,11 @@ function ProductInfo() {
                             </h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {relatedProducts.map((item) => {
-                                    const productImageUrl = item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                                    // Get the first image from imageUrls array or fallback to imageUrl/image
+                                    const productImageUrl = (item.imageUrls && item.imageUrls[0]) || 
+                                                           item.imageUrl || 
+                                                           item.image || 
+                                                           'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                                     
                                     return (
                                         <div 

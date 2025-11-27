@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 
 function DashboardTab() {
   const context = useContext(myContext);
-  const { products, loading, deleteProduct } = context;
+  const { products, loading, deleteProduct, updateProductImages } = context;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
 
@@ -34,15 +34,35 @@ function DashboardTab() {
           <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
           <p className="text-gray-600 mt-1">Manage your product inventory</p>
         </div>
-        <Link
-          to="/add-product"
-          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 transition-all"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add New Product
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={updateProductImages}
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:from-green-700 hover:to-teal-700 shadow-lg shadow-green-500/30 transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Update Images
+          </button>
+          <Link
+            to="/migrate-product-images"
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/30 transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+            Migrate Images
+          </Link>
+          <Link
+            to="/add-product"
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Product
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -116,8 +136,9 @@ function DashboardTab() {
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      {/* Display first image from imageUrls or fallback to imageUrl */}
                       <img
-                        src={product.imageUrl || product.image || '/placeholder.png'}
+                        src={(product.imageUrls && product.imageUrls[0]) || product.imageUrl || product.image || '/placeholder.png'}
                         alt={product.title}
                         className="h-12 w-12 rounded-lg object-cover"
                       />

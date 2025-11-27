@@ -22,6 +22,7 @@ const TestOrders = lazy(() => import('../pages/admin/dashboard/TestOrders'));
 const DashboardTest = lazy(() => import('../pages/admin/dashboard/DashboardTest'));
 const FirebaseTest = lazy(() => import('../pages/admin/dashboard/FirebaseTest'));
 const AddProduct = lazy(() => import('../pages/admin/pages/AddProduct'));
+const MigrateProductImages = lazy(() => import('../pages/admin/pages/MigrateProductImages'));
 const AddOneRupeeItem = lazy(() => import('../pages/admin/pages/AddOneRupeeItem'));
 const AddRequestedProducts = lazy(() => import('../pages/admin/pages/AddRequestedProducts'));
 const UpdateProduct = lazy(() => import('../pages/admin/pages/UpdateProduct'));
@@ -102,6 +103,14 @@ const AppRoutes = () => {
         <Suspense fallback={<LoadingComponent />}>
           <ProtectedRoute requireAdmin={true}>
             <AddProduct />
+          </ProtectedRoute>
+        </Suspense>
+      } />
+      
+      <Route path="/migrate-product-images" element={
+        <Suspense fallback={<LoadingComponent />}>
+          <ProtectedRoute requireAdmin={true}>
+            <MigrateProductImages />
           </ProtectedRoute>
         </Suspense>
       } />

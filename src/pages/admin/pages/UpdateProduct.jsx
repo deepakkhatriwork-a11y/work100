@@ -1,33 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../../../components/layout/Layout';
+import myContext from '../../../context/data/myContext';
 import { toast } from 'react-toastify';
 
 function UpdateProduct() {
     const navigate = useNavigate();
     const { id } = useParams();
+    const context = useContext(myContext);
+    const { getSingleProduct, updateProduct, loading } = context;
+    
     const [product, setProduct] = useState({
         title: '',
         price: '',
-        imageUrl: '',
+        imageUrls: ['', '', '', '', ''], // Support for 5 images
         category: '',
-        description: ''
+        description: '',
+        stock: 0,
+        reserved: 0
     });
 
     useEffect(() => {
         // Fetch product data by ID
-        // Replace with your Firebase/API logic
         const fetchProduct = async () => {
             try {
-                // Mock data - replace with actual API call
-                const mockProduct = {
-                    title: 'Sample Product',
-                    price: '999',
-                    imageUrl: 'https://via.placeholder.com/400',
-                    category: 'Electronics',
-                    description: 'This is a sample product description'
-                };
-                setProduct(mockProduct);
+                const result = await getSingleProduct(id);
+                if (result.success) {
+                    const productData = result.data;
+                    // Ensure we have 5 image slots
+                    const imageUrls = productData.imageUrls || [productData.imageUrl || '', '', '', '', ''];
+                    // Fill empty slots if needed
+                    while (imageUrls.length < 5) {
+                        imageUrls.push('');
+                    }
+                    
+                    setProduct({
+                        title: productData.title || '',
+                        price: productData.price || '',
+                        imageUrls: imageUrls,
+                        category: productData.category || '',
+                        description: productData.description || '',
+                        stock: productData.stock || 0,
+                        reserved: productData.reserved || 0
+                    });
+                }
             } catch (error) {
                 console.error('Error fetching product:', error);
                 toast.error('Failed to load product');
@@ -37,7 +53,7 @@ function UpdateProduct() {
         if (id) {
             fetchProduct();
         }
-    }, [id]);
+    }, [id, getSingleProduct]);
 
     const handleChange = (e) => {
         setProduct({
@@ -46,20 +62,46 @@ function UpdateProduct() {
         });
     };
 
+    // Handle image URL changes
+    const handleImageChange = (index, value) => {
+        const newImageUrls = [...product.imageUrls];
+        newImageUrls[index] = value;
+        setProduct({
+            ...product,
+            imageUrls: newImageUrls
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         // Validation
-        if (!product.title || !product.price || !product.imageUrl || !product.category || !product.description) {
-            toast.error('Please fill all fields');
+        if (!product.title || !product.price || !product.category || !product.description) {
+            toast.error('Please fill all required fields');
+            return;
+        }
+
+        // Check if at least one image is provided
+        const hasImage = product.imageUrls.some(url => url.trim() !== '');
+        if (!hasImage) {
+            toast.error('Please provide at least one image URL');
             return;
         }
 
         try {
-            // Add your Firebase/API logic here
-            console.log('Updating product:', product);
-            toast.success('Product updated successfully');
-            navigate('/dashboard');
+            // Prepare product data for update
+            const productData = {
+                ...product,
+                price: parseFloat(product.price),
+                stock: parseInt(product.stock) || 0,
+                reserved: parseInt(product.reserved) || 0
+            };
+
+            const result = await updateProduct(id, productData);
+            if (result.success) {
+                toast.success('Product updated successfully');
+                navigate('/dashboard');
+            }
         } catch (error) {
             console.error('Error updating product:', error);
             toast.error('Failed to update product');
@@ -114,28 +156,67 @@ function UpdateProduct() {
                             />
                         </div>
 
+                        {/* Multiple Image URLs */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-medium mb-2">Product Image URL</label>
-                            <input
-                                type="text"
-                                name="imageUrl"
-                                value={product.imageUrl}
-                                onChange={handleChange}
-                                className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter image URL"
-                            />
+                            <label className="block text-gray-700 text-sm font-medium mb-2">Product Images (Up to 5)</label>
+                            {[0, 1, 2, 3, 4].map((index) => (
+                                <div key={index} className="mb-2">
+                                    <input
+                                        type="text"
+                                        value={product.imageUrls[index]}
+                                        onChange={(e) => handleImageChange(index, e.target.value)}
+                                        className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder={`Enter image URL ${index + 1}`}
+                                    />
+                                </div>
+                            ))}
                         </div>
 
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-medium mb-2">Product Category</label>
-                            <input
-                                type="text"
+                            <select
                                 name="category"
                                 value={product.category}
                                 onChange={handleChange}
                                 className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter product category"
-                            />
+                            >
+                                <option value="">Select a category</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Home & Living">Home & Living</option>
+                                <option value="Books">Books</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Toys">Toys</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label className="block text-gray-700 text-sm font-medium mb-2">Stock Quantity</label>
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    value={product.stock}
+                                    onChange={handleChange}
+                                    className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 text-sm font-medium mb-2">Reserved</label>
+                                <input
+                                    type="number"
+                                    name="reserved"
+                                    value={product.reserved}
+                                    onChange={handleChange}
+                                    className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="0"
+                                    min="0"
+                                />
+                            </div>
                         </div>
 
                         <div className="mb-6">
@@ -154,9 +235,10 @@ function UpdateProduct() {
                         <div className="flex gap-3">
                             <button
                                 type="submit"
-                                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30"
+                                disabled={loading}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-4 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Update Product
+                                {loading ? 'Updating...' : 'Update Product'}
                             </button>
                             <button
                                 type="button"
