@@ -105,9 +105,9 @@ function Header() {
       } py-3 md:py-4`}
     >
       <div className="max-w-5xl mx-auto px-4">
-        <div className="flex items-center justify-center md:gap-4">
+        <div className="flex items-center justify-between md:gap-4">
           {/* Logo */}
-          <Link to="/" className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white whitespace-nowrap min-w-[250px] md:min-w-[300px]">
+          <Link to="/" className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white whitespace-nowrap min-w-[180px] md:min-w-[250px]">
             Titanium Store
           </Link>
 
@@ -169,7 +169,7 @@ function Header() {
             {/* User Information and Logout */}
             {isAuthenticated ? (
               <>
-                <div className="flex items-center space-x-2">
+                <div className="hidden lg:flex items-center space-x-2">
                   <div className="hidden lg:block text-right">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px]">{user?.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{user?.email}</p>
