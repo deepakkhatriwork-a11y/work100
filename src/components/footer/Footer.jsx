@@ -67,18 +67,22 @@ function Footer() {
   return (
     <>
       {/* Desktop Footer */}
-      <footer className="hidden md:block bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-4">
+      <footer className="hidden md:block bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white dark:text-white mt-16 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12 grid gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h3 className="text-white text-xl sm:text-2xl font-semibold">Titanium Store</h3>
+            <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Titanium Store
+            </h3>
             <p className="mt-3 text-sm text-gray-400 dark:text-gray-500">
-              Premium electronics curated for modern lifestyles. We focus on quality, experience, and
+              Quality electronics curated for modern lifestyles. We focus on quality, experience, and
               customer-first service.
             </p>
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-3 uppercase tracking-wide text-sm">Quick Links</h4>
+            <h4 className="text-sm font-semibold mb-3 uppercase tracking-wide bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              Quick Links
+            </h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="hover:text-white transition-colors">
@@ -104,7 +108,9 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-3 uppercase tracking-wide text-sm">Support</h4>
+            <h4 className="text-sm font-semibold mb-3 uppercase tracking-wide bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Support
+            </h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="hover:text-white transition-colors">
@@ -125,7 +131,9 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold mb-3 uppercase tracking-wide text-sm">Contact</h4>
+            <h4 className="text-sm font-semibold mb-3 uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              Contact
+            </h4>
             <ul className="space-y-2 text-sm">
               <li>Email: Deepakkhatriwork@gmail.com</li>
               <li>Phone: +91 7340275073</li>
@@ -165,44 +173,82 @@ function Footer() {
         </div>
 
         {/* Payment Methods */}
-        <div className="border-t border-gray-800 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
-            <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm">We Accept</h4>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">VISA</span>
+        <div className="border-t border-gray-800 dark:border-gray-700 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <h4 className="text-white font-semibold mb-4 sm:mb-5 text-sm text-center tracking-wide">
+              We Accept
+            </h4>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+              {/* Card style chips */}
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] font-black text-white">
+                  V
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  VISA
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">MC</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-[10px] font-black text-white">
+                  M
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  MasterCard
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">UPI</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-[10px] font-black text-white">
+                  ₹
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  UPI
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">PAYTM</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-[10px] font-black text-white">
+                  P
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  Paytm
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">GPAY</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-[10px] font-black text-white">
+                  G
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  GPay
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">PHONEPE</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[10px] font-black text-white">
+                  Ph
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  PhonePe
+                </span>
               </div>
-              <div className="flex items-center justify-center w-14 h-8 sm:w-16 sm:h-10 bg-white rounded shadow-sm hover:shadow transition-all duration-300 transform hover:-translate-y-0.5">
-                <span className="font-bold text-gray-800 text-[10px] sm:text-xs tracking-wide">COD</span>
+              <div className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white/95 rounded-xl shadow-md hover:shadow-lg transition-transform duration-300 hover:-translate-y-1">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center text-[10px] font-black text-white">
+                  ₹
+                </span>
+                <span className="font-semibold text-gray-900 text-xs sm:text-sm tracking-wide">
+                  Cash on Delivery
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 dark:border-gray-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-500">
             © {new Date().getFullYear()} Titanium Store. All rights reserved.
           </div>
         </div>
       </footer>
 
       {/* Mobile Footer */}
-      <footer className="md:hidden bg-gray-900 dark:bg-gray-950 text-gray-300 dark:text-gray-400 mt-10 pb-16">
+      <footer className="md:hidden bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white dark:text-white mt-10 pb-16">
         <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8">
           <div className="grid gap-6 sm:gap-8 grid-cols-2">
             <div>

@@ -13,8 +13,10 @@ function App() {
     let visitorId = null;
     
     try {
-      // Track visitor when app loads
-      visitorId = trackVisitor();
+      // Track visitor when app loads (non-blocking)
+      setTimeout(() => {
+        visitorId = trackVisitor();
+      }, 1000);
     } catch (error) {
       console.warn('Visitor tracking failed:', error);
     }

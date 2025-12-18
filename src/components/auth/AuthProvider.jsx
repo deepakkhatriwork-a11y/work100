@@ -49,18 +49,16 @@ const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, [dispatch]);
 
-  // Memoize the loading state to prevent unnecessary re-renders
-  const loadingComponent = useMemo(() => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <Spinner size="lg" />
-        <p className="mt-4 text-gray-600">Loading...</p>
-      </div>
-    </div>
-  ), []);
-
+  // Show a simple spinner during authentication loading
   if (loading) {
-    return loadingComponent;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Spinner size="lg" />
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

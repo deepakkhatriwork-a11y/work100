@@ -11,12 +11,22 @@ function AllProducts() {
     const { mode, products } = context;
     const dispatch = useDispatch();
 
+    // Handle image loading errors with better fallback
+    const handleImageError = (e) => {
+        e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+        e.target.onerror = null; // Prevent infinite loop
+    };
+
     const handleAddToCart = (product) => {
+        // Get the first image from imageUrls array or fallback to imageUrl/image
+        const productImage = (product.imageUrls && product.imageUrls[0]) || 
+                           product.imageUrl || 
+                           product.image || 
+                           'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+        
         dispatch(addItemToCart({
-            id: product.id,
-            title: product.title,
-            price: product.price,
-            image: product.image,
+            ...product,
+            image: productImage,
             quantity: 1
         }));
     };
@@ -51,58 +61,67 @@ function AllProducts() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                        {products.map((product) => (
-                            <div key={product.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-                                <Link to={`/product/${product.id}`} className="block">
-                                    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
-                                        <img
-                                            src={product.image}
-                                            alt={product.title}
-                                            className="w-full h-48 md:h-64 object-cover object-center group-hover:opacity-90 transition-opacity"
-                                        />
-                                    </div>
-                                    <div className="p-3 md:p-4">
-                                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 h-10 md:h-12">
-                                            {product.title}
-                                        </h3>
-                                        <div className="mt-1 flex items-center">
-                                            <div className="flex items-center">
-                                                {[0, 1, 2, 3, 4].map((rating) => (
-                                                    <FiStar
-                                                        key={rating}
-                                                        className={`h-3 w-3 md:h-4 md:w-4 ${rating < product.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                        aria-hidden="true"
-                                                    />
-                                                ))}
+                        {products.map((product) => {
+                            // Get the first image from imageUrls array or fallback to imageUrl/image
+                            const productImageUrl = (product.imageUrls && product.imageUrls[0]) || 
+                                                  product.imageUrl || 
+                                                  product.image || 
+                                                  'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                            
+                            return (
+                                <div key={product.id} className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+                                    <Link to={`/product/${product.id}`} className="block">
+                                        <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
+                                            <img
+                                                src={productImageUrl}
+                                                alt={product.title}
+                                                className="w-full h-48 md:h-64 object-cover object-center group-hover:opacity-90 transition-opacity"
+                                                onError={handleImageError}
+                                            />
+                                        </div>
+                                        <div className="p-3 md:p-4">
+                                            <h3 className="text-sm font-medium text-gray-900 line-clamp-2 h-10 md:h-12">
+                                                {product.title}
+                                            </h3>
+                                            <div className="mt-1 flex items-center">
+                                                <div className="flex items-center">
+                                                    {[0, 1, 2, 3, 4].map((rating) => (
+                                                        <FiStar
+                                                            key={rating}
+                                                            className={`h-3 w-3 md:h-4 md:w-4 ${rating < (product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                            aria-hidden="true"
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <p className="ml-1 md:ml-2 text-xs md:text-sm text-gray-500">{product.reviewCount || 0} reviews</p>
                                             </div>
-                                            <p className="ml-1 md:ml-2 text-xs md:text-sm text-gray-500">{product.reviewCount} reviews</p>
+                                            <div className="mt-2 flex items-center justify-between">
+                                                <p className="text-base font-medium text-gray-900">
+                                                    ₹{product.price?.toFixed(2) || 'N/A'}
+                                                    {product.originalPrice && (
+                                                        <span className="ml-2 text-sm text-gray-500 line-through">
+                                                            ₹{product.originalPrice.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="mt-2 flex items-center justify-between">
-                                            <p className="text-base font-medium text-gray-900">
-                                                ₹{product.price.toFixed(2)}
-                                                {product.originalPrice && (
-                                                    <span className="ml-2 text-sm text-gray-500 line-through">
-                                                        ₹{product.originalPrice.toFixed(2)}
-                                                    </span>
-                                                )}
-                                            </p>
-                                        </div>
+                                    </Link>
+                                    <div className="px-3 md:px-4 pb-3 md:pb-4">
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleAddToCart(product);
+                                            }}
+                                            className="w-full flex items-center justify-center px-3 py-2 md:px-4 md:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        >
+                                            <FiShoppingBag className="mr-2 h-4 w-4" />
+                                            <span className="text-xs md:text-sm">Add to Cart</span>
+                                        </button>
                                     </div>
-                                </Link>
-                                <div className="px-3 md:px-4 pb-3 md:pb-4">
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleAddToCart(product);
-                                        }}
-                                        className="w-full flex items-center justify-center px-3 py-2 md:px-4 md:py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                    >
-                                        <FiShoppingBag className="mr-2 h-4 w-4" />
-                                        <span className="text-xs md:text-sm">Add to Cart</span>
-                                    </button>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

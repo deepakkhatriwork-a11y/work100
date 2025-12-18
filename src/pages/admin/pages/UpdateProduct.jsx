@@ -14,6 +14,7 @@ function UpdateProduct() {
         title: '',
         price: '',
         imageUrls: ['', '', '', '', ''], // Support for 5 images
+        modelUrls: ['', '', ''], // Support for 3 3D models
         category: '',
         description: '',
         stock: 0,
@@ -34,10 +35,18 @@ function UpdateProduct() {
                         imageUrls.push('');
                     }
                     
+                    // Ensure we have 3 model slots
+                    const modelUrls = productData.modelUrls || ['', '', ''];
+                    // Fill empty slots if needed
+                    while (modelUrls.length < 3) {
+                        modelUrls.push('');
+                    }
+                    
                     setProduct({
                         title: productData.title || '',
                         price: productData.price || '',
                         imageUrls: imageUrls,
+                        modelUrls: modelUrls,
                         category: productData.category || '',
                         description: productData.description || '',
                         stock: productData.stock || 0,
@@ -69,6 +78,16 @@ function UpdateProduct() {
         setProduct({
             ...product,
             imageUrls: newImageUrls
+        });
+    };
+
+    // Handle 3D model URL changes
+    const handleModelChange = (index, value) => {
+        const newModelUrls = [...product.modelUrls];
+        newModelUrls[index] = value;
+        setProduct({
+            ...product,
+            modelUrls: newModelUrls
         });
     };
 
@@ -167,6 +186,23 @@ function UpdateProduct() {
                                         onChange={(e) => handleImageChange(index, e.target.value)}
                                         className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         placeholder={`Enter image URL ${index + 1}`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* 3D Model URLs */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-medium mb-2">3D Models (Up to 3)</label>
+                            <p className="text-gray-500 text-xs mb-2">Enter URLs for 3D model viewers (e.g., Sketchfab links)</p>
+                            {[0, 1, 2].map((index) => (
+                                <div key={index} className="mb-2">
+                                    <input
+                                        type="text"
+                                        value={product.modelUrls[index]}
+                                        onChange={(e) => handleModelChange(index, e.target.value)}
+                                        className="bg-gray-50 border border-gray-300 px-4 py-3 w-full rounded-lg text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder={`Enter 3D model URL ${index + 1}`}
                                     />
                                 </div>
                             ))}

@@ -5,23 +5,41 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Add submitting state
   const dropdownRef = useRef(null)
 
-  const closeModal = () => setIsOpen(false)
+  const closeModal = () => {
+    // Only close modal if not submitting
+    if (!isSubmitting) {
+      setIsOpen(false)
+    }
+  }
   const openModal = () => setIsOpen(true)
 
-  const handleOrder = (e) => {
+  const handleOrder = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    
+    // Set submitting state
+    setIsSubmitting(true);
     
     // Validation
     if (name === "" || address === "" || pincode === "" || phoneNumber === "" || selectedState === "") {
       // Show error message in the modal
       alert("All fields are required");
+      setIsSubmitting(false); // Reset submitting state
       return;
     }
     
-    buyNow();
-    closeModal();
+    try {
+      await buyNow();
+    } finally {
+      // Always reset submitting state and close modal
+      setIsSubmitting(false);
+      closeModal();
+    }
   };
 
   // Close dropdown when clicking outside
@@ -140,6 +158,7 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                         onChange={(e) => setName(e.target.value)}
                         className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
@@ -154,6 +173,7 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                         onChange={(e) => setAddress(e.target.value)}
                         className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div ref={dropdownRef}>
@@ -171,8 +191,9 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                           }}
                           onFocus={() => setIsDropdownOpen(true)}
                           className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
+                          disabled={isSubmitting}
                         />
-                        {isDropdownOpen && (
+                        {isDropdownOpen && !isSubmitting && (
                           <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-auto border border-gray-200">
                             {filteredStates.length > 0 ? (
                               filteredStates.map((state) => (
@@ -210,6 +231,7 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                         onChange={(e) => setPincode(e.target.value)}
                         className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <div>
@@ -224,13 +246,29 @@ export default function Modal({ name, address, pincode, phoneNumber, setName, se
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         className="border border-gray-300 bg-white text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 outline-none"
                         required
+                        disabled={isSubmitting}
                       />
                     </div>
                     <button
                       type="submit"
-                      className="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-sm px-5 py-2.5 transition focus:outline-none"
+                      className={`w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 transition focus:outline-none ${
+                        isSubmitting 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-green-600 hover:bg-green-700'
+                      }`}
+                      disabled={isSubmitting}
                     >
-                      {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Continue to Payment'}
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Processing...
+                        </span>
+                      ) : (
+                        paymentMethod === 'cod' ? 'Place Order (COD)' : 'Continue to Payment'
+                      )}
                     </button>
                   </form>
                 </Dialog.Panel>

@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { addItemToCart } from '../../redux/slices/cartSlice'
 import Layout from '../../components/layout/Layout'
 import myContext from '../../context/data/myContext'
-import { FiArrowLeft, FiShare2, FiShoppingCart, FiSun, FiHeart } from 'react-icons/fi'
+import { FiArrowLeft, FiShare2, FiShoppingCart, FiSun, FiHeart, FiBox } from 'react-icons/fi'
 import { toast } from 'react-toastify'
 
 function ProductDetail() {
@@ -85,6 +85,10 @@ function ProductDetail() {
                       (product.imageUrl ? [product.imageUrl] : []) || 
                       (product.image ? [product.image] : []) || 
                       ['https://placehold.co/800x600/cccccc/ffffff?text=No+Image']
+  
+  // Get all 3D models for the product
+  const productModels = (product.modelUrls && product.modelUrls.filter(url => url)) || 
+                       []
 
   const handleAddToCart = () => {
     const cartItem = {
@@ -92,6 +96,7 @@ function ProductDetail() {
       name: product.title || product.name,
       price: product.price,
       image: productImages[0],
+      modelUrls: productModels, // Add 3D model URLs to cart item
       quantity: 1
     }
     
@@ -115,22 +120,42 @@ function ProductDetail() {
               <FiArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <FiShare2 className="w-5 h-5" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <FiShoppingCart className="w-5 h-5" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <FiSun className="w-5 h-5" />
-              </button>
+              {/* 3D Icon in Header - Clickable to open 3D model */}
+              {productModels.length > 0 && (
+                <button 
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="p-2 text-purple-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+                  title="View 3D Model"
+                >
+                  <FiBox className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
           {/* Product Images */}
-          <div className="bg-gray-50 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-4 md:mb-6">
+          <div className="bg-gray-50 rounded-2xl md:rounded-3xl p-4 md:p-8 mb-4 md:mb-6 relative">
+            {/* 3D Icon Overlay on Image */}
+            {productModels.length > 0 && (
+              <div className="absolute top-6 right-6 z-10">
+                <button 
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="p-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-300 flex items-center justify-center cursor-pointer"
+                  title="View 3D Model"
+                >
+                  <FiBox className="w-6 h-6 text-purple-600" />
+                </button>
+              </div>
+            )}
+            
             <img 
               src={productImages[currentImage]}
               alt={product.title || product.name}
@@ -144,7 +169,7 @@ function ProductDetail() {
 
           {/* Image Dots */}
           {productImages.length > 1 && (
-            <div className="flex justify-center space-x-2 mb-4 md:mb-6">
+            <div className="flex justify-center space-x-2 mb-4 md:mb-6 items-center">
               {productImages.map((_, index) => (
                 <button
                   key={index}
@@ -155,12 +180,42 @@ function ProductDetail() {
                   aria-label={`View image ${index + 1}`}
                 />
               ))}
+              {/* 3D Icon next to image dots */}
+              {productModels.length > 0 && (
+                <div className="ml-4">
+                  <button
+                    onClick={() => {
+                      // Open first 3D model in new tab
+                      window.open(productModels[0], '_blank');
+                    }}
+                    className="p-2 bg-purple-100 rounded-full hover:bg-purple-200 transition-colors flex items-center justify-center"
+                    aria-label="View 3D Model"
+                  >
+                    <FiBox className="w-5 h-5 text-purple-600" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Product Info */}
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{product.title || product.name}</h1>
+            <div className="flex items-start justify-between">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{product.title || product.name}</h1>
+              {/* 3D Icon next to product title */}
+              {productModels.length > 0 && (
+                <button 
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="p-2 bg-purple-100 rounded-full hover:bg-purple-200 transition-colors flex items-center justify-center ml-2 mt-1"
+                  title="View 3D Model"
+                >
+                  <FiBox className="w-5 h-5 text-purple-600" />
+                </button>
+              )}
+            </div>
             
             {/* Rating */}
             {product.rating && (
@@ -205,13 +260,73 @@ function ProductDetail() {
               >
                 <FiHeart className={`w-5 h-5 md:w-6 md:h-6 ${isFavorite ? 'fill-current' : ''}`} />
               </button>
+              
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-blue-600 text-white py-3 md:py-4 rounded-2xl font-semibold hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-blue-600 text-white py-3 md:py-4 rounded-2xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center"
               >
+                <FiShoppingCart className="w-5 h-5 md:w-6 md:h-6 mr-2" />
                 Add to Cart
               </button>
+              
+              {/* 3D Model Button - Clickable to open 3D model */}
+              {productModels.length > 0 && (
+                <button
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="p-3 md:p-4 rounded-2xl border-2 border-purple-300 text-purple-600 hover:border-purple-400 hover:bg-purple-50 transition-colors flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl"
+                  aria-label="View 3D Model"
+                >
+                  <FiBox className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              )}
             </div>
+            
+            {/* Buy Now Button */}
+            <div className="mt-4 flex space-x-3">
+              <button
+                onClick={() => {
+                  handleAddToCart();
+                  navigate('/cart');
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 md:py-4 rounded-2xl font-semibold transition-colors"
+              >
+                Buy Now
+              </button>
+              
+              {/* 3D Model Button - Next to Buy Now */}
+              {productModels.length > 0 && (
+                <button
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="p-3 md:p-4 rounded-2xl border-2 border-purple-300 text-purple-600 hover:border-purple-400 hover:bg-purple-50 transition-colors flex items-center justify-center cursor-pointer shadow-lg hover:shadow-xl"
+                  aria-label="View 3D Model"
+                >
+                  <FiBox className="w-5 h-5 md:w-6 md:h-6" />
+                </button>
+              )}
+            </div>
+            
+            {/* 3D Model Button - Dedicated button to view 3D model */}
+            {productModels.length > 0 && (
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    // Open first 3D model in new tab
+                    window.open(productModels[0], '_blank');
+                  }}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 md:py-4 rounded-2xl font-semibold transition-colors flex items-center justify-center"
+                >
+                  <FiBox className="w-5 h-5 md:w-6 md:h-6 mr-2" />
+                  View 3D Model
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       </div>

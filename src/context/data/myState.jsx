@@ -5,7 +5,12 @@ import { fireDB } from '../../firebase/firebaseConfig';
 import { toast } from 'react-toastify';
 
 const MyState = (props) => {
-    const [mode, setMode] = useState('light');
+    // Initialize mode from localStorage or default to 'light'
+    const [mode, setMode] = useState(() => {
+        const savedMode = localStorage.getItem('themeMode');
+        return savedMode || 'light';
+    });
+    
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
@@ -16,6 +21,18 @@ const MyState = (props) => {
     const [user, setUser] = useState([]);
     const [refundRequests, setRefundRequests] = useState([]);
 
+    // Apply theme on mount and mode change
+    useEffect(() => {
+        if (mode === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.body.style.backgroundColor = "rgb(17, 24, 39)";
+        } else {
+            document.documentElement.classList.remove('dark');
+            document.body.style.backgroundColor = "white";
+        }
+        localStorage.setItem('themeMode', mode);
+    }, [mode]);
+
     // Log when order state changes
     useEffect(() => {
         console.log('Order state updated:', order);
@@ -24,24 +41,19 @@ const MyState = (props) => {
     // Fetch products when component mounts
     useEffect(() => {
         getProduct();
-        // Delay other data fetching to improve initial load time
+        // Reduce delay for other data fetching to improve initial load time
         const timer = setTimeout(() => {
             getUserData();
             getOrderData();
             getRefundRequests();
-        }, 1000);
+        }, 300);
         
         return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const toggleMode = () => {
-        if (mode === 'light') {
-            setMode('dark');
-            document.body.style.backgroundColor = "rgb(46 49 55)";
-        } else {
-            setMode('light');
-            document.body.style.backgroundColor = "white";
-        }
+        setMode(prevMode => prevMode === 'light' ? 'dark' : 'light');
     };
 
     // Get Product Function with caching
@@ -131,137 +143,6 @@ const MyState = (props) => {
         } catch (error) {
             console.error('Error fetching product:', error);
             toast.error('Failed to fetch product');
-            setLoading(false);
-            return { success: false, error };
-        }
-    };
-
-    // Function to update product images to use local images
-    const updateProductImages = async () => {
-        setLoading(true);
-        try {
-            const querySnapshot = await getDocs(collection(fireDB, 'products'));
-            const updates = [];
-            
-            querySnapshot.forEach((doc) => {
-                const productData = doc.data();
-                let updatedImageUrl = productData.imageUrl;
-                
-                // Update Arduino products to use uno.jpg
-                if (productData.title && productData.title.toLowerCase().includes('arduino')) {
-                    updatedImageUrl = '/uno.jpg';
-                }
-                // Update Battery products to use litium.jpg
-                else if (productData.title && productData.title.toLowerCase().includes('battery') || 
-                         productData.title && productData.title.toLowerCase().includes('lithium')) {
-                    updatedImageUrl = '/litium.jpg';
-                }
-                
-                // Only update if image URL has changed
-                if (updatedImageUrl !== productData.imageUrl) {
-                    updates.push(updateDoc(doc.ref, { imageUrl: updatedImageUrl }));
-                }
-            });
-            
-            // Execute all updates
-            await Promise.all(updates);
-            toast.success('Product images updated successfully');
-            getProduct(); // Refresh products list
-            setLoading(false);
-            return { success: true };
-        } catch (error) {
-            console.error('Error updating product images:', error);
-            toast.error('Failed to update product images');
-            setLoading(false);
-            return { success: false, error };
-        }
-    };
-
-    // Add Sample Orders Function
-    const addSampleOrders = async (userId) => {
-        setLoading(true);
-        try {
-            // Sample orders data
-            const sampleOrders = [
-                {
-                    userid: userId,
-                    userName: "John Doe",
-                    email: "john@example.com",
-                    totalAmount: 2499,
-                    status: "Processing",
-                    date: new Date().toLocaleString("en-US", {
-                        month: "short",
-                        day: "2-digit",
-                        year: "numeric",
-                    }),
-                    paymentId: "PAY" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                    cartItems: [
-                        {
-                            id: "1",
-                            title: "Smart Fitness Watch",
-                            price: 2499,
-                            imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1099&q=80",
-                            quantity: 1
-                        }
-                    ],
-                    address: {
-                        name: "John Doe",
-                        address: "123 Main Street",
-                        city: "New York",
-                        state: "NY",
-                        pincode: "10001"
-                    }
-                },
-                {
-                    userid: userId,
-                    userName: "John Doe",
-                    email: "john@example.com",
-                    totalAmount: 1898,
-                    status: "Shipped",
-                    date: new Date(Date.now() - 86400000).toLocaleString("en-US", {
-                        month: "short",
-                        day: "2-digit",
-                        year: "numeric",
-                    }),
-                    paymentId: "PAY" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-                    cartItems: [
-                        {
-                            id: "2",
-                            title: "Wireless Bluetooth Earbuds",
-                            price: 1299,
-                            imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1032&q=80",
-                            quantity: 1
-                        },
-                        {
-                            id: "3",
-                            title: "Designer Cotton T-Shirt",
-                            price: 599,
-                            imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1180&q=80",
-                            quantity: 1
-                        }
-                    ],
-                    address: {
-                        name: "John Doe",
-                        address: "123 Main Street",
-                        city: "New York",
-                        state: "NY",
-                        pincode: "10001"
-                    }
-                }
-            ];
-
-            // Add each sample order to Firestore
-            for (const order of sampleOrders) {
-                await addDoc(collection(fireDB, 'orders'), order);
-            }
-
-            toast.success('Sample orders added successfully');
-            getUserOrders(userId); // Refresh user orders
-            setLoading(false);
-            return { success: true };
-        } catch (error) {
-            console.error('Error adding sample orders:', error);
-            toast.error('Failed to add sample orders');
             setLoading(false);
             return { success: false, error };
         }
@@ -465,7 +346,6 @@ const MyState = (props) => {
         getProduct,
         updateProduct, // Added update product function
         getSingleProduct, // Added get single product function
-        updateProductImages,
         user,
         setUser,
         getUserData,

@@ -7,6 +7,7 @@ import { addToWishlist } from '../../redux/slices/wishlistSlice';
 import { toast } from 'react-toastify';
 import Layout from '../../components/layout/Layout';
 import { FiHeart } from 'react-icons/fi';
+import { FiBox, FiTag, FiTruck, FiRefreshCw } from 'react-icons/fi'; // Added 3D icons
 
 function ProductInfo() {
     const { id } = useParams();
@@ -23,7 +24,10 @@ function ProductInfo() {
     
     useEffect(() => {
         // Find the product by ID
+        console.log('Searching for product with ID:', id);
+        console.log('Available products:', products);
         const foundProduct = products.find(item => item.id === id);
+        console.log('Found product:', foundProduct);
         if (foundProduct) {
             setProduct(foundProduct);
             
@@ -34,6 +38,7 @@ function ProductInfo() {
             setRelatedProducts(related);
         } else {
             // If product not found, redirect to products page
+            console.log('Product not found, redirecting to products page');
             navigate('/products');
         }
     }, [id, products, navigate]);
@@ -265,12 +270,19 @@ function ProductInfo() {
                                         <div 
                                             key={item.id} 
                                             onClick={() => navigate(`/product/${item.id}`)}  
-                                            className="group cursor-pointer transform transition-transform duration-300 hover:-translate-y-1"
+                                            className="group cursor-pointer transform transition-transform duration-300 hover:-translate-y-1 relative"
                                         >
                                             <div 
                                                 className="h-full border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300" 
                                                 style={{ backgroundColor: mode === 'dark' ? 'rgb(30 41 59)' : 'white' }}
                                             >
+                                                {/* 3D Icon Badge */}
+                                                <div className="absolute top-2 right-2 z-10">
+                                                    <div className="bg-blue-500 text-white rounded-full p-1 shadow-lg">
+                                                        <FiBox className="w-4 h-4" />
+                                                    </div>
+                                                </div>
+                                                
                                                 <div className="flex justify-center cursor-pointer">
                                                     <img 
                                                         className="w-full h-48 object-contain p-4 transition-transform duration-300 group-hover:scale-105" 
@@ -293,6 +305,23 @@ function ProductInfo() {
                                                     >
                                                         ₹ {item.price}
                                                     </p>
+                                                    
+                                                    {/* 3D Features Icons */}
+                                                    <div className="flex justify-center space-x-4 mb-3">
+                                                        <div className="flex flex-col items-center">
+                                                            <FiTruck className="w-5 h-5 text-gray-500" />
+                                                            <span className="text-xs text-gray-500 mt-1">Fast</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-center">
+                                                            <FiTag className="w-5 h-5 text-gray-500" />
+                                                            <span className="text-xs text-gray-500 mt-1">Best</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-center">
+                                                            <FiRefreshCw className="w-5 h-5 text-gray-500" />
+                                                            <span className="text-xs text-gray-500 mt-1">Return</span>
+                                                        </div>
+                                                    </div>
+                                                    
                                                     <div className="flex gap-2">
                                                         <button 
                                                             onClick={(e) => {

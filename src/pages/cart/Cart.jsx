@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiMinus, FiBox } from 'react-icons/fi'; // Added FiBox import
 import Layout from '../../components/layout/Layout';
 import Modal from '../../components/modal/Modal';
 import { 
@@ -27,6 +27,7 @@ function Cart() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("razorpay"); // 'razorpay' or 'cod'
   const [selectedState, setSelectedState] = useState(""); // Added state selection
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // Add loading state
 
   // State-wise shipping charges
   const stateShippingCharges = {
@@ -66,11 +67,15 @@ function Cart() {
   const grandTotal = shipping + totalAmount;
 
   const buyNow = async () => {
+    // Set loading state
+    setIsPlacingOrder(true);
+    
     // Validation is now handled in the modal component
     // Check if user is authenticated
     if (!user || !user.id) {
       toast.error("Please log in to place an order");
       navigate("/login");
+      setIsPlacingOrder(false); // Reset loading state
       return;
     }
 
@@ -100,6 +105,7 @@ function Cart() {
       // Validate COD eligibility
       const codValidation = validateCODEligibility(grandTotal, pincode);
       if (!codValidation.eligible) {
+        setIsPlacingOrder(false); // Reset loading state
         return toast.error(codValidation.reason || 'COD is not available for this order');
       }
       
@@ -153,6 +159,9 @@ function Cart() {
         } else {
           toast.error('Failed to save order. Please try again.');
         }
+      } finally {
+        // Always reset loading state
+        setIsPlacingOrder(false);
       }
       return;
     }
@@ -219,6 +228,9 @@ function Cart() {
           } else {
             toast.error('Failed to save order. Please try again.');
           }
+        } finally {
+          // Always reset loading state
+          setIsPlacingOrder(false);
         }
       },
       theme: {
@@ -228,6 +240,14 @@ function Cart() {
     
     var pay = new window.Razorpay(options);
     pay.open();
+    
+    // For Razorpay, we need to reset loading state if payment is cancelled
+    // Add event listener for payment failure
+    pay.on("payment.failed", function (response) {
+      toast.error('Payment failed. Please try again.');
+      console.log('Payment failed:', response.error);
+      setIsPlacingOrder(false); // Reset loading state on failure
+    });
   };
 
   const handleRemoveItem = (id) => {
@@ -313,14 +333,29 @@ function Cart() {
             {items.map((item) => (
               <div key={item.id} className="p-4 sm:p-6 flex flex-col md:flex-row border-b border-gray-200 last:border-0">
                 <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
-                  <img
-                    src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
-                    alt={item.title}
-                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md"
-                    onError={(e) => {
-                      e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
-                    }}
-                  />
+                  <div className="relative">
+                    <img
+                      src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
+                      alt={item.title}
+                      className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-md"
+                      onError={(e) => {
+                        e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                      }}
+                    />
+                    {/* 3D Icon Overlay */}
+                    {item.modelUrls && item.modelUrls.length > 0 && (
+                      <button 
+                        onClick={() => {
+                          // Open first 3D model in new tab
+                          window.open(item.modelUrls[0], '_blank');
+                        }}
+                        className="absolute top-1 right-1 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-300 flex items-center justify-center cursor-pointer"
+                        title="View 3D Model"
+                      >
+                        <FiBox className="w-4 h-4 text-purple-600" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:justify-between">

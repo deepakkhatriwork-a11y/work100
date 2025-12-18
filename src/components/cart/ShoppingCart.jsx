@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { FiTrash2, FiPlus, FiMinus, FiArrowLeft, FiShoppingBag } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiMinus, FiArrowLeft, FiShoppingBag, FiBox } from 'react-icons/fi';
 import { CartContext } from '../../context/CartContext';
 
 const ShoppingCart = () => {
@@ -67,7 +67,7 @@ const ShoppingCart = () => {
                 <div key={`${item.id}-${item.selectedColor}-${item.selectedSize}`} className="p-4 sm:p-6">
                   <div className="flex flex-col sm:flex-row">
                     {/* Product Image */}
-                    <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-gray-200 rounded-md overflow-hidden">
+                    <div className="flex-shrink-0 w-full sm:w-32 h-32 bg-gray-200 rounded-md overflow-hidden relative">
                       <img
                         src={item.imageUrl || item.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
                         alt={item.name}
@@ -76,6 +76,19 @@ const ShoppingCart = () => {
                           e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                         }}
                       />
+                      {/* 3D Icon Overlay */}
+                      {item.modelUrls && item.modelUrls.length > 0 && (
+                        <button 
+                          onClick={() => {
+                            // Open first 3D model in new tab
+                            window.open(item.modelUrls[0], '_blank');
+                          }}
+                          className="absolute top-1 right-1 p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-all duration-300 flex items-center justify-center cursor-pointer"
+                          title="View 3D Model"
+                        >
+                          <FiBox className="w-4 h-4 text-purple-600" />
+                        </button>
+                      )}
                     </div>
 
                     {/* Product Info */}

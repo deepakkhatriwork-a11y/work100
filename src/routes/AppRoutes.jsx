@@ -1,180 +1,102 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Home from '../pages/home/Home';
-import AllProductsWithFilter from '../pages/allproducts/AllProductsWithFilter';
-import Cart from '../pages/cart/Cart';
-import Checkout from '../pages/checkout/Checkout';
-import Wishlist from '../pages/wishlist/Wishlist';
-import ProductInfo from '../pages/products/ProductInfo';
-import { Login } from '../pages/auth/Login';
-import { Register } from '../pages/auth/Register';
-import Unauthorized from '../pages/unauthorized/Unauthorized';
-import NoPage from '../pages/nopage/NoPage';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
-import TermsAndConditions from '../pages/TermsAndConditions';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
-import { Spinner } from '../components/ui/Spinner';
 
-// Lazy load admin components
+// Preload critical routes for faster navigation
+const preloadRoute = (importFunc) => {
+  importFunc(); // Trigger preload
+  return importFunc; // Return original function
+};
+
+// Lazy load ALL components for better performance
+const ModernHomepage = lazy(preloadRoute(() => import('../pages/home/ModernHomepage')));
+const Home = lazy(() => import('../pages/home/Home'));
+const AllProductsWithFilter = lazy(preloadRoute(() => import('../pages/allproducts/AllProductsWithFilter')));
+const Cart = lazy(() => import('../pages/cart/Cart'));
+const Checkout = lazy(() => import('../pages/checkout/Checkout'));
+const Wishlist = lazy(() => import('../pages/wishlist/Wishlist'));
+const ProductInfo = lazy(() => import('../pages/products/ProductInfo'));
+const Login = lazy(() => import('../pages/auth/Login').then(module => ({ default: module.Login })));
+const Register = lazy(() => import('../pages/auth/Register').then(module => ({ default: module.Register })));
+const Unauthorized = lazy(() => import('../pages/unauthorized/Unauthorized'));
+const NoPage = lazy(() => import('../pages/nopage/NoPage'));
+const PrivacyPolicy = lazy(() => import('../pages/PrivacyPolicy'));
+const TermsAndConditions = lazy(() => import('../pages/TermsAndConditions'));
 const Dashboard = lazy(() => import('../pages/admin/dashboard/Dashboard'));
-const AdminDashboardTab = lazy(() => import('../pages/admin/dashboard/AdminDashboardTab'));
-const TestOrders = lazy(() => import('../pages/admin/dashboard/TestOrders'));
-const DashboardTest = lazy(() => import('../pages/admin/dashboard/DashboardTest'));
-const FirebaseTest = lazy(() => import('../pages/admin/dashboard/FirebaseTest'));
-const AddProduct = lazy(() => import('../pages/admin/pages/AddProduct'));
-const MigrateProductImages = lazy(() => import('../pages/admin/pages/MigrateProductImages'));
-const AddOneRupeeItem = lazy(() => import('../pages/admin/pages/AddOneRupeeItem'));
-const AddRequestedProducts = lazy(() => import('../pages/admin/pages/AddRequestedProducts'));
-const UpdateProduct = lazy(() => import('../pages/admin/pages/UpdateProduct'));
-const ManageAdvertisements = lazy(() => import('../pages/admin/pages/ManageAdvertisements'));
-const SetupAdmin = lazy(() => import('../pages/admin/SetupAdmin'));
-const MakeAdmin = lazy(() => import('../pages/admin/MakeAdmin'));
+const AdminDashboard = lazy(() => import('../pages/admin/dashboard/AdminDashboardTab'));
 const Order = lazy(() => import('../pages/order/Order'));
-const FirebaseDiagnostics = lazy(() => import('../pages/FirebaseDiagnostics'));
+const AddProduct = lazy(() => import('../pages/admin/pages/AddProduct')); // AddProduct component
+const UpdateProduct = lazy(() => import('../pages/admin/pages/UpdateProduct')); // UpdateProduct component
 
-// Loading component for suspense
-const LoadingComponent = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <Spinner size="lg" />
-  </div>
-);
+function AppRoutes() {
+  // Preload commonly accessed routes after initial render
+  useEffect(() => {
+    // Preload cart and wishlist for quicker access
+    setTimeout(() => {
+      import('../pages/cart/Cart');
+      import('../pages/wishlist/Wishlist');
+    }, 2000);
+  }, []);
 
-const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/products" element={<AllProductsWithFilter />} />
-      <Route path="/allproducts" element={<AllProductsWithFilter />} />
-      <Route path="/product/:id" element={<ProductInfo />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/wishlist" element={<Wishlist />} />
-      
-      {/* Lazy loaded routes with suspense */}
-      <Route path="/order" element={
-        <Suspense fallback={<LoadingComponent />}>
+    <Suspense fallback={null}>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<ModernHomepage />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/products" element={<AllProductsWithFilter />} />
+        <Route path="/productinfo/:id" element={<ProductInfo />} />
+        <Route path="/product/:id" element={<ProductInfo />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        } />
+        <Route path="/order" element={
           <ProtectedRoute>
             <Order />
           </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/dashboard" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
+        } />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        
+        {/* Admin Routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute requiredRole="admin">
             <Dashboard />
           </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/admin-dashboard" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <AdminDashboardTab />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/test-orders" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <TestOrders />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/dashboard-test" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <DashboardTest />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/firebase-test" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <FirebaseTest />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/add-product" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
+        } />
+        <Route path="/add-product" element={
+          <ProtectedRoute requiredRole="admin">
             <AddProduct />
           </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/migrate-product-images" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <MigrateProductImages />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/add-one-rupee-item" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <AddOneRupeeItem />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/add-requested-products" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <AddRequestedProducts />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/manage-advertisements" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
-            <ManageAdvertisements />
-          </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/update-product/:id" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <ProtectedRoute requireAdmin={true}>
+        } />
+        <Route path="/update-product/:id" element={
+          <ProtectedRoute requiredRole="admin">
             <UpdateProduct />
           </ProtectedRoute>
-        </Suspense>
-      } />
-      
-      <Route path="/setup-admin" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <SetupAdmin />
-        </Suspense>
-      } />
-      
-      <Route path="/make-admin" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <MakeAdmin />
-        </Suspense>
-      } />
-      
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/products/:id" element={<ProductInfo />} />
-      
-      <Route path="/firebase-diagnostics" element={
-        <Suspense fallback={<LoadingComponent />}>
-          <FirebaseDiagnostics />
-        </Suspense>
-      } />
-      
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-      <Route path="*" element={<NoPage />} />
-    </Routes>
+        } />
+        <Route path="/admin/*" element={
+          <ProtectedRoute requiredRole="admin">
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admindashboard/*" element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* Catch all */}
+        <Route path="*" element={<NoPage />} />
+      </Routes>
+    </Suspense>
   );
-};
+}
 
 export default AppRoutes;

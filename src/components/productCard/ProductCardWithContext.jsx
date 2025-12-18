@@ -34,47 +34,31 @@ function ProductCardWithContext() {
     // Filter products based on search, category, and price
     const filteredProducts = products.filter((item) => {
         const matchesSearch = item.title && item.title.toLowerCase().includes(searchkey.toLowerCase());
-        const matchesCategory = filterType === '' || (item.category && item.category.toLowerCase().includes(filterType.toLowerCase()));
-        
-        // Price filter - handle different filter options
-        let matchesPrice = true;
-        if (filterPrice !== '') {
-            const price = parseFloat(item.price);
-            if (filterPrice === '0-1000') {
-                matchesPrice = price <= 1000;
-            } else if (filterPrice === '1001-5000') {
-                matchesPrice = price > 1000 && price <= 5000;
-            } else if (filterPrice === '5001-10000') {
-                matchesPrice = price > 5000 && price <= 10000;
-            } else if (filterPrice === '10001+') {
-                matchesPrice = price > 10000;
-            }
-        }
-        
+        const matchesCategory = filterType ? item.category === filterType : true;
+        const matchesPrice = filterPrice ? 
+            (filterPrice === 'under-1000' && item.price < 1000) ||
+            (filterPrice === '1000-5000' && item.price >= 1000 && item.price <= 5000) ||
+            (filterPrice === 'above-5000' && item.price > 5000) : true;
+            
         return matchesSearch && matchesCategory && matchesPrice;
     });
 
     return (
-        <section className="text-gray-600 body-font">
-            <div className="container px-5 py-8 md:py-16 mx-auto">
-                <div className="lg:w-1/2 w-full mb-6 lg:mb-10">
-                    <h1 className="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>Our Latest Collection</h1>
-                    <div className="h-1 w-20 bg-pink-600 rounded"></div>
-                </div>
-
+        <section className="py-16 min-h-screen">
+            <div className="container mx-auto px-4">
                 {filteredProducts.length === 0 ? (
                     <div className="text-center py-12">
-                        <h3 className="text-lg font-medium text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>No products found</h3>
-                        <p className="mt-2 text-gray-600" style={{ color: mode === 'dark' ? 'white' : '' }}>Try adjusting your search or filter criteria</p>
+                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-2xl font-bold py-4 px-8 rounded-lg inline-block">
+                            No products found
+                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-wrap -m-4">
                         {filteredProducts.map((item, index) => {
                             const { id, title, price, imageUrl, image } = item;
-                            // Fallback to 'image' property if 'imageUrl' is not available
                             const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                             
-                            // Handle image loading errors with better fallback
+                            // Handle image loading errors
                             const handleImageError = (e) => {
                                 e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                                 e.target.onerror = null; // Prevent infinite loop
@@ -83,12 +67,12 @@ function ProductCardWithContext() {
                             return (
                                 <div 
                                     key={id || index} 
-                                    className="p-4 md:w-1/4 drop-shadow-lg cursor-pointer"
-                                    onClick={() => navigate(`/product/${id}`)}
+                                    className="p-4 md:w-1/4 drop-shadow-lg"
                                 >
                                     <div 
-                                        className="h-full border-2 hover:shadow-gray-100 hover:shadow-2xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden" 
+                                        className="h-full border-2 hover:shadow-gray-100 hover:shadow-2xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-2xl overflow-hidden cursor-pointer"
                                         style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '' }}
+                                        onClick={() => navigate(`/product/${id}`)}
                                     >
                                         <div className="flex justify-center">
                                             <img 

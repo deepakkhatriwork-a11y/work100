@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useMemo } from 'react'
+import React, { useContext, useEffect, useMemo, useRef } from 'react'
 import myContext from '../../context/data/myContext'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import { addItemToCart } from '../../redux/slices/cartSlice'
 import { addToWishlist } from '../../redux/slices/wishlistSlice'
-import { useNavigate, Link } from 'react-router-dom'
-import { FiHeart } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
+import { FiHeart, FiBox } from 'react-icons/fi'
 
 function ProductCard() {
     const context = useContext(myContext)
@@ -14,6 +14,9 @@ function ProductCard() {
     const dispatch = useDispatch()
     const cartItems = useSelector((state) => state.cart)
     const navigate = useNavigate();
+    
+    // Create a ref for the product grid container
+    const productGridRef = useRef(null);
 
     // add to cart
     const addCart = (product) => {
@@ -22,147 +25,52 @@ function ProductCard() {
     }
 
     // add to wishlist
-    const addWishlist = (product) => {
-        // Get the first image from imageUrls array or fallback to imageUrl/image
-        const firstImage = (product.imageUrls && product.imageUrls[0]) || 
-                          product.imageUrl || 
-                          product.image || 
-                          'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
-        
-        const wishlistItem = {
-            id: product.id,
-            name: product.title,
-            price: product.price,
-            image: firstImage
-        };
-        dispatch(addToWishlist(wishlistItem));
+    const addWishlist = async (product) => {
+        const productId = product.id;
+        const userId = JSON.parse(localStorage.getItem('user')).user.uid;
+        dispatch(addToWishlist({ productId, userId }));
         toast.success('Added to wishlist');
     }
 
-    useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cartItems));
-    }, [cartItems])
-
-    // Memoize filtered products to prevent unnecessary re-renders
+    // Filter products based on search, category, and price
     const filteredProducts = useMemo(() => {
-        return products.filter((obj) => {
-            // Search filter - check if searchkey matches title, description, or category
-            const matchesSearch = searchkey === '' || 
-                (obj.title && obj.title.toLowerCase().includes(searchkey.toLowerCase())) ||
-                (obj.description && obj.description.toLowerCase().includes(searchkey.toLowerCase())) ||
-                (obj.category && obj.category.toLowerCase().includes(searchkey.toLowerCase()));
-            
-            // Category filter
-            const matchesCategory = filterType === '' || 
-                (obj.category && obj.category.toLowerCase().includes(filterType.toLowerCase()));
-            
-            // Price filter - handle different filter options
-            let matchesPrice = true;
-            if (filterPrice !== '') {
-                const price = parseFloat(obj.price);
-                if (filterPrice === '0-1000') {
-                    matchesPrice = price <= 1000;
-                } else if (filterPrice === '1001-5000') {
-                    matchesPrice = price > 1000 && price <= 5000;
-                } else if (filterPrice === '5001-10000') {
-                    matchesPrice = price > 5000 && price <= 10000;
-                } else if (filterPrice === '10001+') {
-                    matchesPrice = price > 10000;
-                }
-            }
-            
+        return products.filter((item) => {
+            const matchesSearch = item.title && item.title.toLowerCase().includes(searchkey.toLowerCase());
+            const matchesCategory = filterType ? item.category === filterType : true;
+            const matchesPrice = filterPrice ? 
+                (filterPrice === 'under-1000' && item.price < 1000) ||
+                (filterPrice === '1000-5000' && item.price >= 1000 && item.price <= 5000) ||
+                (filterPrice === 'above-5000' && item.price > 5000) : true;
+                
             return matchesSearch && matchesCategory && matchesPrice;
         });
     }, [products, searchkey, filterType, filterPrice]);
 
-    // Limit products displayed to improve performance
-    const displayProducts = useMemo(() => {
-        return filteredProducts.slice(0, 20); // Show only first 20 products
-    }, [filteredProducts]);
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     return (
-        <section className="text-gray-600 body-font">
-            <div className="container px-4 py-6 md:py-8 mx-auto">
-                <div className="lg:w-1/2 w-full mb-4 md:mb-6">
-                    <h1 className="sm:text-2xl text-xl font-medium title-font mb-2 text-gray-900" style={{ color: mode === 'dark' ? 'white' : '' }}>Our Latest Collection</h1>
-                    <div className="h-1 w-16 bg-pink-600 rounded"></div>
-                </div>
-
-                {products.length === 0 ? (
-                    <div className="text-center py-8">
-                        <div className="mx-auto w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2" style={{ color: mode === 'dark' ? 'white' : '' }}>No products available</h3>
-                        <p className="mt-2 text-gray-600 mb-4" style={{ color: mode === 'dark' ? 'gray' : '' }}>
-                            There are currently no products in the store.
-                        </p>
-                        <div className="mt-4">
-                            <Link 
-                                to="/dashboard" 
-                                className="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                                Go to Dashboard
-                            </Link>
-                        </div>
-                    </div>
-                ) : displayProducts.length === 0 ? (
-                    <div className="text-center py-8">
-                        <div className="mx-auto w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-                            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-2" style={{ color: mode === 'dark' ? 'white' : '' }}>No products found</h3>
-                        <p className="mt-2 text-gray-600 mb-4" style={{ color: mode === 'dark' ? 'gray' : '' }}>
-                            Try adjusting your search or filter criteria
-                        </p>
-                        <div className="flex flex-col sm:flex-row justify-center gap-2">
-                            <button 
-                                onClick={() => {
-                                    setSearchkey('');
-                                    setFilterType('');
-                                    setFilterPrice('');
-                                }}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                                Reset All Filters
-                            </button>
-                            <Link 
-                                to="/products" 
-                                className="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-md hover:shadow-lg text-sm"
-                            >
-                                View All Products
-                            </Link>
-                        </div>
-                        <div className="mt-6">
-                            <p className="text-gray-500 text-xs" style={{ color: mode === 'dark' ? 'gray' : '' }}>
-                                Active filters: 
-                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {searchkey ? `Search: "${searchkey}"` : ''}
-                                </span>
-                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {filterType ? `Category: ${filterType}` : ''}
-                                </span>
-                                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {filterPrice ? `Price: ${filterPrice}` : ''}
-                                </span>
-                            </p>
+        <section className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+            <div className="container mx-auto">
+                {/* Product Grid */}
+                {filteredProducts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-2xl font-bold py-4 px-8 rounded-lg inline-block">
+                            No products found
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {displayProducts.map((item, index) => {
-                            const { id, title, price, description, imageUrl, image, imageUrls } = item;
-                            // Get the first image from imageUrls array or fallback to imageUrl/image
-                            const productImageUrl = (imageUrls && imageUrls[0]) || 
-                                                   imageUrl || 
-                                                   image || 
-                                                   'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                    <div 
+                        ref={productGridRef}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    >
+                        {filteredProducts.map((item, index) => {
+                            const { id, title, price, imageUrl, image } = item;
+                            const productImageUrl = imageUrl || image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                             
-                            // Handle image loading errors with better fallback
+                            // Handle image loading errors
                             const handleImageError = (e) => {
                                 e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
                                 e.target.onerror = null; // Prevent infinite loop
@@ -171,64 +79,104 @@ function ProductCard() {
                             return (
                                 <div 
                                     key={id || index} 
-                                    onClick={() => navigate(`/product/${id}`)}  
-                                    className="drop-shadow-lg cursor-pointer"
+                                    className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
                                 >
                                     <div 
-                                        className="h-full border-2 hover:shadow-gray-100 hover:shadow-xl transition-shadow duration-300 ease-in-out border-gray-200 border-opacity-60 rounded-xl overflow-hidden" 
-                                        style={{ backgroundColor: mode === 'dark' ? 'rgb(46 49 55)' : '', color: mode === 'dark' ? 'white' : '' }}
+                                        className="h-full flex flex-col cursor-pointer"
+                                        onClick={() => navigate(`/product/${id}`)}
                                     >
-                                        <div className="flex justify-center cursor-pointer">
+                                        {/* Image Container with Gradient Overlay */}
+                                        <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                             <img 
-                                                className="rounded-xl w-full h-48 object-cover p-2 hover:scale-105 transition-transform duration-300 ease-in-out" 
+                                                className="w-full h-64 object-cover p-4 group-hover:scale-110 transition-transform duration-700 ease-out" 
                                                 src={productImageUrl} 
                                                 alt={title || 'Product'} 
                                                 onError={handleImageError}
-                                                loading="lazy" // Lazy load product images
+                                                loading="lazy"
                                             />
+                                            {/* Quick View Button - Appears on Hover */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                <span className="bg-white/90 backdrop-blur-md text-gray-900 px-6 py-2.5 rounded-full font-semibold shadow-xl transform scale-90 group-hover:scale-100 transition-transform flex items-center">
+                                                    <FiBox className="w-5 h-5 mr-2 text-purple-600" />
+                                                    Quick View
+                                                </span>
+                                            </div>
+                                            
+                                            {/* Additional 3D Icon - Always Visible */}
+                                            <div className="absolute top-4 right-4">
+                                                <div className="p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center">
+                                                    <FiBox className="w-5 h-5 text-purple-600" />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="p-3 border-t-2">
-                                            <h2 
-                                                className="tracking-wider text-xs title-font font-medium text-gray-400 mb-1" 
-                                                style={{ color: mode === 'dark' ? 'white' : '' }}
-                                            >
-                                                TitaniumStore
-                                            </h2>
-                                            <h1 
-                                                className="title-font text-base font-medium text-gray-900 mb-1 line-clamp-2" 
-                                                style={{ color: mode === 'dark' ? 'white' : '' }}
+
+                                        {/* Content */}
+                                        <div className="p-6 flex-grow flex flex-col">
+                                            {/* Brand/Store Tag */}
+                                            <div className="flex items-center justify-between mb-3">
+                                                <span 
+                                                    className="text-xs font-bold tracking-wider uppercase bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-gradient-x"
+                                                >
+                                                    TitaniumStore
+                                                </span>
+                                                <div className="flex items-center space-x-1 bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-1 rounded-full">
+                                                    <svg className="w-3 h-3 text-white fill-current" viewBox="0 0 20 20">
+                                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                                    </svg>
+                                                    <span className="text-xs font-bold text-white">4.8</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Title */}
+                                            <h3 
+                                                className="font-bold text-lg text-gray-900 dark:text-white mb-3 line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors min-h-[3.5rem] flex-grow"
                                             >
                                                 {title}
-                                            </h1>
-                                            <p 
-                                                className="leading-relaxed mb-2 text-base font-semibold" 
-                                                style={{ color: mode === 'dark' ? 'white' : '' }}
-                                            >
-                                                ₹ {price}
-                                            </p>
-                                            <div className="flex justify-center mb-1">
+                                            </h3>
+
+                                            {/* Price with Vibrant Gradient */}
+                                            <div className="flex items-baseline gap-2 mb-5">
+                                                <span 
+                                                    className="text-2xl font-extrabold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 bg-clip-text text-transparent"
+                                                >
+                                                    ₹{price?.toLocaleString('en-IN')}
+                                                </span>
+                                                {price > 1000 && (
+                                                    <span className="text-sm text-gray-400 dark:text-gray-500 line-through">
+                                                        ₹{(price * 1.2).toFixed(0)}
+                                                    </span>
+                                                )}
+                                                {price > 1000 && (
+                                                    <span className="text-xs font-bold bg-gradient-to-r from-pink-500 to-rose-500 text-white px-2 py-0.5 rounded-full">
+                                                        -{Math.round(((price * 1.2 - price) / (price * 1.2)) * 100)}%
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Action Buttons with Vibrant Colors */}
+                                            <div className="flex gap-3 mt-auto">
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         addWishlist(item);
                                                     }} 
                                                     type="button" 
-                                                    className="focus:outline-none text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 focus:ring-2 focus:ring-purple-300 font-medium rounded-lg text-xs w-full py-1.5 flex items-center justify-center"
+                                                    className="flex-1 border-2 border-pink-200 dark:border-pink-800 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 text-pink-600 dark:text-pink-400 hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-900/40 dark:hover:to-rose-900/40 hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/30 transition-all duration-300 font-bold rounded-xl py-2.5 flex items-center justify-center group/btn"
                                                 >
-                                                    <FiHeart className="mr-1" />
-                                                    Wishlist
+                                                    <FiHeart className="mr-2 group-hover/btn:scale-125 group-hover/btn:fill-pink-500 transition-all" />
+                                                    <span className="hidden sm:inline">Wishlist</span>
                                                 </button>
-                                            </div>
-                                            <div className="flex justify-center">
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         addCart(item);
                                                     }} 
                                                     type="button" 
-                                                    className="focus:outline-none text-white bg-pink-600 hover:bg-pink-700 focus:ring-2 focus:ring-purple-300 font-medium rounded-lg text-xs w-full py-1.5"
+                                                    className="flex-[2] bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 bg-[length:200%_100%] hover:bg-right text-white font-black rounded-xl py-2.5 shadow-xl hover:shadow-2xl hover:shadow-purple-500/60 transition-all duration-500 transform hover:scale-105 relative overflow-hidden group"
                                                 >
-                                                    Add To Cart
+                                                    <span className="relative z-10">Add To Cart</span>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                                 </button>
                                             </div>
                                         </div>

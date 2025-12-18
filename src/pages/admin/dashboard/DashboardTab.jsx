@@ -35,15 +35,6 @@ function DashboardTab() {
           <p className="text-gray-600 mt-1">Manage your product inventory</p>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={updateProductImages}
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:from-green-700 hover:to-teal-700 shadow-lg shadow-green-500/30 transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Update Images
-          </button>
           <Link
             to="/migrate-product-images"
             className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/30 transition-all"
@@ -138,9 +129,13 @@ function DashboardTab() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {/* Display first image from imageUrls or fallback to imageUrl */}
                       <img
-                        src={(product.imageUrls && product.imageUrls[0]) || product.imageUrl || product.image || '/placeholder.png'}
+                        src={(product.imageUrls && product.imageUrls[0]) || product.imageUrl || product.image || 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image'}
                         alt={product.title}
                         className="h-12 w-12 rounded-lg object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://placehold.co/400x400/cccccc/ffffff?text=No+Image';
+                          e.target.onerror = null;
+                        }}
                       />
                     </td>
                     <td className="px-6 py-4">
